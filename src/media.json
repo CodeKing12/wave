@@ -1,0 +1,170 @@
+{
+    "_index": "media",
+    "_id": "64df27bf7605c65ca8e64fab",
+    "_score": null,
+    "_source": {
+        "original_language": "en",
+        "languages": [],
+        "networks": [],
+        "collections": [],
+        "ratings": {},
+        "premieres": [],
+        "videos": [
+            {
+                "name": "Trailer",
+                "type": "Trailer",
+                "url": "//video.pmgstatic.com/files/videos/157/830/157830815/167944516_1e8xpx.mp4",
+                "subtitles": []
+            }
+        ],
+        "info_labels": {
+            "originaltitle": "Love, Sex and 30 Candles",
+            "genre": [
+                "Drama",
+                "Romance"
+            ],
+            "year": 2023,
+            "director": [
+                "Stephina Zwane"
+            ],
+            "studio": [],
+            "writer": [
+                "Stephina Zwane"
+            ],
+            "premiered": "2023-08-18",
+            "dateadded": "2023-08-18 08:11:43",
+            "mediatype": "movie",
+            "country": [
+                null
+            ],
+            "status": "Released",
+            "duration": 6360
+        },
+        "cast": [
+            {
+                "name": "Amogelang Chidi",
+                "role": "",
+                "order": 0
+            },
+            {
+                "name": "Bahumi Madisakwane",
+                "role": "",
+                "order": 1
+            },
+            {
+                "name": "Gabisile Tshabalala",
+                "role": "",
+                "order": 2
+            },
+            {
+                "name": "Anthony Oseyemi",
+                "order": 3
+            },
+            {
+                "name": "Loyiso Macdonald",
+                "order": 4
+            },
+            {
+                "name": "Candice Modiselle",
+                "order": 5
+            },
+            {
+                "name": "Lunga Shabalala",
+                "order": 6
+            }
+        ],
+        "i18n_info_labels": [
+            {
+                "lang": "cs",
+                "title": "Láska, sex a 30 svíček",
+                "plot": "Čtyři nejlepší kámošky, co mají třicítku na krku, společně řeší trable ve vztazích i jednu nečekanou situaci, která je možná navždycky rozdělí.",
+                "tagline": "",
+                "art": {
+                    "poster": "https://image.tmdb.org/t/p/original//lQUg3fkx3TJUmWop8PrODuvEiDd.jpg",
+                    "fanart": "https://image.tmdb.org/t/p/original//uMrlgIrlz9RzZ1M08Z98qM5iKvx.jpg"
+                }
+            },
+            {
+                "lang": "sk",
+                "title": "Láska, sex a 30 svíček",
+                "plot": "",
+                "tagline": "",
+                "art": {
+                    "poster": "https://image.tmdb.org/t/p/original//lQUg3fkx3TJUmWop8PrODuvEiDd.jpg",
+                    "fanart": "https://image.tmdb.org/t/p/original//uMrlgIrlz9RzZ1M08Z98qM5iKvx.jpg"
+                }
+            },
+            {
+                "lang": "en",
+                "title": "Love, Sex and 30 Candles",
+                "plot": "Through a year of 30th birthdays, four best friends navigate relationships, heartbreak and a shocking situation that threatens to tear them apart.",
+                "tagline": "",
+                "art": {
+                    "poster": "https://image.tmdb.org/t/p/original//lQUg3fkx3TJUmWop8PrODuvEiDd.jpg",
+                    "fanart": "https://image.tmdb.org/t/p/original//uMrlgIrlz9RzZ1M08Z98qM5iKvx.jpg"
+                }
+            }
+        ],
+        "services": {
+            "csfd": "1399341",
+            "trakt": "936516",
+            "trakt_with_type": "movie:936516",
+            "slug": "love-sex-and-30-candles-2023",
+            "tmdb": "1162172"
+        },
+        "available_streams": {
+            "languages": {
+                "audio": {
+                    "items": [
+                        {
+                            "lang": "en",
+                            "date_added": "2023-08-18T08:11:45.828Z"
+                        }
+                    ],
+                    "map": [
+                        "en"
+                    ]
+                },
+                "subtitles": {
+                    "items": [
+                        {
+                            "lang": "cs",
+                            "date_added": "2023-08-18T08:11:45.828Z"
+                        }
+                    ],
+                    "map": [
+                        "cs"
+                    ]
+                }
+            },
+            "count": 2
+        },
+        "stream_info": {
+            "video": {
+                "codec": "AVC",
+                "width": 1920,
+                "height": 1080,
+                "aspect": 1.778,
+                "duration": 6382.2
+            },
+            "subtitles": {
+                "language": "cs"
+            },
+            "audio": {
+                "codec": "E-AC-3",
+                "channels": 6,
+                "language": "en"
+            }
+        },
+        "popularity": 169234630.29998136,
+        "trending": 16923463030.000015,
+        "play_count": 1,
+        "children_count": 0,
+        "total_children_count": 0,
+        "is_concert": false,
+        "tags": []
+    },
+    "sort": [
+        1692346303000
+    ]
+}
