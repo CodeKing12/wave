@@ -3,6 +3,10 @@ export interface Rating {
     votes: number;
 }
 
+export interface RatingObj {
+    [trakt: string]: Rating;
+};
+
 export interface Video {
     name: string | null;
     size: number | null;
@@ -24,6 +28,21 @@ export interface Art {
     fanart?: string;
     banner?: string;
 }
+
+export type InfoLabels = {
+    originaltitle: string;
+    genre: string[];
+    year: number;
+    director: string[];
+    studio: string[];
+    writer: string[];
+    premiered: string;
+    dateadded: string;
+    mediatype: string;
+    country: (string | null)[];
+    status: string;
+    duration: number;
+};
 
 export interface I18nInfoLabel {
     lang: string;
@@ -52,16 +71,22 @@ export interface AvailableStreams {
     count: number;
 }
 
+export interface Person {
+    name: string;
+    role?: string;
+    order: number;
+};
+
 export interface ApiSource {
     original_language: string;
     languages: string[];
     networks: string[];
     collections: any[]; // Update with the correct type if needed
-    ratings: {
-        [trakt: string]: Rating;
-    };
+    ratings: RatingObj;
     // ... other properties
+    cast: Person[];
     i18n_info_labels: I18nInfoLabel[];
+    info_labels: InfoLabels;
     available_streams: AvailableStreams;
 }
 

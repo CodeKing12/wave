@@ -16,7 +16,7 @@ export default function MediaList({ media }: any) {
 
     return (
         <>
-            <div className={`flex flex-wrap gap-4 delay-display ${openModal ? "hidden" : ""}`}>
+            <div className={`flex flex-wrap gap-4 ${openModal ? "hidden" : ""}`}>
                 {
                     media.length ? media.map((show: MediaObj, index: number) => (
                         <MediaCard key={index} media={show?._source} showMediaInfo={() => displayMediaInfo(show)} />

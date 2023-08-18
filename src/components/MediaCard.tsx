@@ -1,6 +1,6 @@
 import Show from "@/images/show-3.jpeg";
 import { Heart, Star1, Image as ImageIcon } from "iconsax-react";
-import { I18nInfoLabel } from "./MediaTypes"
+import { I18nInfoLabel, RatingObj } from "./MediaTypes"
 import Image from "next/image";
 import { useState } from "react";
 
@@ -36,22 +36,28 @@ export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
     return selectedDetails;
 }
 
-export default function MediaCard({ media, showMediaInfo }: any) {
-    let genres: string;
-    let rating: number = 0;
+export function getRatingAggr(ratings: RatingObj) {
+    let aggrRating: number = 0
     let voteCount: number = 0;
-    const premiere_date = new Date(media.info_labels?.premiered);
-    const displayDetails = getDisplayDetails(media.i18n_info_labels);
 
-    if (Object.keys(media?.ratings).length) {
-        for (const source in media?.ratings) {
-            const ratingData = media?.ratings[source];
-            rating += ratingData.rating;
+    if (Object.keys(ratings).length) {
+        for (const source in ratings) {
+            const ratingData = ratings[source];
+            aggrRating += ratingData.rating;
             voteCount += ratingData.votes;
         }
         
-        rating = (rating / Object.keys(media?.ratings).length) / 2
+        aggrRating = (aggrRating / Object.keys(ratings).length) / 2
     }
+    
+    return { rating: aggrRating, voteCount };
+}
+
+export default function MediaCard({ media, showMediaInfo }: any) {
+    let genres: string;
+    let { rating, voteCount } = getRatingAggr(media?.ratings);
+    const premiere_date = new Date(media.info_labels?.premiered);
+    const displayDetails = getDisplayDetails(media.i18n_info_labels);
 
     // if (!displayDetails) {
     //     if (media && media.i18n_info_labels) {
@@ -75,7 +81,7 @@ export default function MediaCard({ media, showMediaInfo }: any) {
         <div className="w-full h-full absolute bottom-0 py-5 px-3 text-gray-100 bg-black bg-opacity-80 rounded-[11px] opacity-0 group-hover:opacity-100 invisible group-hover:visible ease-in-out duration-[400ms]" onClick={() => showMediaInfo(true)}>
             <div className="flex flex-col justify-between h-full">
                 <div>
-                    <h5 className="text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ media.info_labels?.originaltitle }</h5>
+                    <h5 className="text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ displayDetails?.title || media.info_labels?.originaltitle }</h5>
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-gray-400">{genres}</p>
                         <p className="text-sm text-gray-400 text-opacity-80">{premiere_date.getFullYear() || ""}</p>

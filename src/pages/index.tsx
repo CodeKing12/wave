@@ -120,14 +120,14 @@ export default function Home() {
           }
         </div>
         <div className={`flex items-center justify-between mt-10 ${loading ? "opacity-40 pointer-events-none" : "opacity-100 pointer-events-auto"}`}>
-          <button className="px-10 py-3.5 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4" onClick={() => updatePagination(page, -1)}>
+          <button className="px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4" onClick={() => updatePagination(page, -1)}>
               <ArrowLeft size={32} variant='Bold' />
               Previous
           </button>
 
           <p className="text-lg font-semibold text-gray-300">Page: <span className="text-yellow-300 ml-2">{ pagination[page] + 1 }</span> / { Math.round(totals[page] / mediaPerPage) }</p>
 
-          <button className="px-10 py-3.5 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4" onClick={() => updatePagination(page, +1)}>
+          <button className="px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4" onClick={() => updatePagination(page, +1)}>
               Next
               <ArrowRight size={32} variant='Bold' />
           </button>
