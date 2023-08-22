@@ -1,5 +1,5 @@
-export const ENDPOINT = "https://plugin.sc2.zone";
-export const PATH_SEARCH = "/api/media/filter/v2/search?order=desc&sort=score&type=*";
+export const MEDIA_ENDPOINT = "https://plugin.sc2.zone";
+export const PATH_SEARCH_MEDIA = "/api/media/filter/v2/search?order=desc&sort=score&type=*";
 export const DEFAULT_ITEM_COUNT = 100;
 export const PATH_MOVIES = "/api/media/filter/v2/news?type=movie&sort=dateAdded&order=desc&days=365";
 export const PATH_SERIES = "/api/media/filter/v2/news?type=tvshow&sort=dateAdded&order=desc&days=365";
@@ -16,3 +16,18 @@ export const PATH_SERIES_ADDED = "/api/media/filter/v2/all?type=tvshow&sort=date
 
 export const TOKEN_PARAM_NAME = "access_token"
 export const TOKEN_PARAM_VALUE = "th2tdy0no8v1zoh1fs59";
+
+
+
+export const AUTH_ENDPOINT = "https://webshare.cz";
+export const PATH_SALT = "/api/salt/";
+export const PATH_LOGIN = "/api/login/";
+export const PATH_USER_DATA = "/api/user_data/";
+export const PATH_FILE_LINK = "/api/file_link/";
+export const PATH_FILE_PASSWORD_SALT = "/api/file_password_salt/";
+export const PATH_FILE_PROTECTED = "/api/file_protected/";
+export const PATH_SEARCH = "/api/search/";
+export const PATH_FILE_INFO = "/api/file_info/";
+export const authAxiosConfig = {
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+}

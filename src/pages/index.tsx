@@ -3,14 +3,26 @@ import { Inter } from 'next/font/google'
 import Sidebar, { PageType } from '@/components/Sidebar'
 import { SearchNormal1, ArrowLeft, ArrowRight } from "iconsax-react"
 import axios from 'axios';
-import { ENDPOINT, PATH_ANIMATED_MOVIES, PATH_ANIMATED_SERIES, PATH_CONCERTS, PATH_FAIRY_TALES, PATH_MOVIES, PATH_MOVIES_CZSK, PATH_SERIES, PATH_SERIES_CZSK, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE } from '@/components/constants';
+import { MEDIA_ENDPOINT, PATH_ANIMATED_MOVIES, PATH_ANIMATED_SERIES, PATH_CONCERTS, PATH_FAIRY_TALES, PATH_MOVIES, PATH_MOVIES_CZSK, PATH_SERIES, PATH_SERIES_CZSK, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE } from '@/components/constants';
 import { useEffect, useState, useRef } from 'react';
 import MovieList from '@/components/MediaList';
 // import { BeatLoader, BounceLoader, ClipLoader, ClockLoader, ClimbingBoxLoader, FadeLoader, GridLoader, PuffLoader, PulseLoader, PropagateLoader, RingLoader, SquareLoader, SkewLoader, ScaleLoader, HashLoader, SyncLoader, RotateLoader } from 'react-spinners';
 import { HashLoader } from 'react-spinners';
 import { MediaObj } from '@/components/MediaTypes';
+import Login from '@/components/Login';
+import useAuthToken from '@/hooks/useAuthToken';
+import { getUUID, uuidv4 } from '@/utils/general';
 
 const inter = Inter({ subsets: ['latin'] })
+
+
+export function parseXml(data: string, param: string) {
+  const xml = new DOMParser().parseFromString(data, "application/xml");
+  const processed = xml.getElementsByTagName("response")[0];
+
+  return processed.getElementsByTagName(param)[0].textContent || "";
+}
+
 
 interface ApiMapper {
   [key: string]: string
@@ -41,12 +53,24 @@ function Navbar() {
 }
 
 export default function Home() {
-  const [loading, setLoading] = useState(false)
-  const [media, setMedia] = useState<MediaType>({})
-  const [page, setPage] = useState<PageType>("movies")
-  const [totals, setTotals] = useState<PaginationType>({} as PaginationType)
-  const [pagination, setPagination] = useState<PaginationType>({} as PaginationType)
+  const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [openLogin, setOpenLogin] = useState(false);
+  const [authToken, setAuthToken] = useState("");
+  const [media, setMedia] = useState<MediaType>({});
+  const [page, setPage] = useState<PageType>("movies");
+  const [totals, setTotals] = useState<PaginationType>({} as PaginationType);
+  const [pagination, setPagination] = useState<PaginationType>({} as PaginationType);
   const prevPagination = useRef(pagination)
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('authToken');
+
+    if (storedToken) {
+      setAuthToken(storedToken);
+      setIsAuthenticated(true);
+    }
+  }, []);
   
   const mediaPerPage = 100
   const fetched = []
@@ -80,7 +104,7 @@ export default function Home() {
       if (pagination[page] >= (media[page]?.length ?? 0)) {
         setLoading(true);
         // console.log("Passed all checks")
-        axios.get(ENDPOINT + api_map[page], {
+        axios.get(MEDIA_ENDPOINT + api_map[page], {
           params: {
             [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
             from: pagination[page] > 0 ? mediaPerPage * pagination[page] : undefined ,
@@ -116,7 +140,9 @@ export default function Home() {
         <div className="relative flex-1 mt-6">
           {/* {console.log(media[page])} */}
           {
-            media[page] && media[page]?.[pagination[page]]?.length ? <MovieList page={page} media={media[page]?.[pagination[page]]} /> : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            media[page] && media[page]?.[pagination[page]]?.length ? 
+            <MovieList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => {console.log("Got here");setOpenLogin(true)}} page={page} media={media[page]?.[pagination[page]]} />
+            : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
           }
         </div>
         <div className={`flex items-center justify-between mt-10 ${loading ? "opacity-40 pointer-events-none" : "opacity-100 pointer-events-auto"}`}>
@@ -133,6 +159,8 @@ export default function Home() {
           </button>
         </div>
       </section>
+
+      <Login show={openLogin && !isAuthenticated} onLogin={(isSuccess, token) => {setIsAuthenticated(isSuccess);setAuthToken(token)}} onClose={() => setOpenLogin(false)} />
     </main>
   )
 }

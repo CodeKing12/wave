@@ -1,3 +1,55 @@
+export interface AudioStream {
+    language: string;
+    codec: string;
+    channels: number;
+};
+
+export interface VideoStream {
+    width: number;
+    height: number;
+    codec: string;
+    aspect: number;
+    "3d": boolean;
+    duration: number;
+    hdr: any;
+};
+
+export interface Subtitle {
+    _id: string;
+    language: string;
+    forced: boolean;
+};
+
+export interface StreamObj {
+    _id: string;
+    name: string;
+    media: string;
+    provider: string;
+    date_added: string;
+    ident: string;
+    size: number;
+    audio: AudioStream[];
+    video: VideoStream[];
+    subtitles: Subtitle[];
+};
+
+export interface LeanMediaStream {
+    size: number;
+    language: string;
+    subtitleList: string[];
+    subtitles: string;
+    width: number;
+    height: number;
+    videoCodec: string;
+    audioCodec: string;
+    duration: number;
+    ident: string;
+    name: string;
+    media: string;
+    hdr?: number;
+    is3d?: boolean;
+}
+
 export interface Rating {
     rating: number;
     votes: number;
@@ -90,10 +142,15 @@ export interface ApiSource {
     available_streams: AvailableStreams;
 }
 
+export interface MediaStream {
+
+}
+
 export interface MediaObj {
     _index: string;
     _id: string;
     _score: null;
     _source: ApiSource;
+    _streams?: StreamObj[];
     sort: number[];
 }

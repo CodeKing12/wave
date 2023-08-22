@@ -12,7 +12,7 @@
   background-color: #191919;
 }
 
-a, button {
+a, button, input {
   transition: all 0.3s ease;
 }
 
