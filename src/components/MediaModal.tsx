@@ -173,6 +173,10 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
     const [isLoadingUrl, setIsLoadingUrl] = useState(false);
     const movieTitle = displayDetails?.title || movieDetails.info_labels?.originaltitle;
 
+    function onMediaCanLoad(event: any) {
+        console.log(event)
+    }
+
     useEffect(() => {
         if (!media._streams) {
             axios.get(MEDIA_ENDPOINT + `/api/media/${media._id}/streams`, {
@@ -312,8 +316,8 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                     <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={isLoadingUrl} />
                 </div>
 
-                <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
-                    <MediaPlayer
+                <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
+                    {/* <MediaPlayer
                         title={displayDetails?.title || movieDetails.info_labels?.originaltitle}
                         src={mediaUrl}
                         poster={displayDetails.art.poster}
@@ -321,6 +325,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                         aspectRatio={selectedStream?.video[0].aspect || 16 / 9}
                         crossorigin="anonymous"
                         autoplay={true}
+                        onCanLoad={onMediaCanLoad}
                     >
                         <MediaOutlet>
                             <MediaPoster
@@ -335,7 +340,30 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                             />
                         </MediaOutlet>
                         <MediaCommunitySkin />
-                    </MediaPlayer>
+                    </MediaPlayer> */}
+
+                    <video
+                        id="my-video"
+                        className="video-js"
+                        controls
+                        preload="auto"
+                        width="100%"
+                        height="100%"
+                        data-setup="{}"
+                        src={mediaUrl}
+                    >
+                        {/* <p className="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a
+                        web browser that
+                            <a href="https://videojs.com/html5-video-support/" target="_blank">
+                                supports HTML5 video
+                            </a>
+                        </p> */}
+                    </video>
+
+                    <button className="w-10 h-10 bg-yellow-200 absolute top-0 right-0 z-[99999] flex items-center justify-center" onClick={() => setMediaUrl("")}>
+                        <Back variant="Bold" />
+                    </button>
                 </div>
             </div>
         </div>

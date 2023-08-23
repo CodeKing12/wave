@@ -24,7 +24,7 @@ export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
             selectedObject = mediaI18n[0];
         }
 
-        console.log(selectedObject, selectedDetails)
+        // console.log(selectedObject, selectedDetails)
 
         selectedDetails = selectedObject;
     }

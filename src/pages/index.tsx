@@ -121,7 +121,7 @@ export default function Home() {
               [page]: [...currentPage, response.data.hits.hits]
             }))
             setLoading(false);
-            console.log(response.data.hits.hits)
+            // console.log(response.data.hits.hits)
           }
         )
       }
@@ -151,7 +151,11 @@ export default function Home() {
               Previous
           </button>
 
-          <p className="text-lg font-semibold text-gray-300">Page: <span className="text-yellow-300 ml-2">{ pagination[page] + 1 }</span> / { Math.round(totals[page] / mediaPerPage) }</p>
+          {
+            pagination[page] ?
+            <p className="text-lg font-semibold text-gray-300">Page: <span className="text-yellow-300 ml-2">{ pagination[page] + 1 }</span> / { Math.round(totals[page] / mediaPerPage) }</p>
+            : ""
+          }
 
           <button className="px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4" onClick={() => updatePagination(page, +1)}>
               Next
