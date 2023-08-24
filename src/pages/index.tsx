@@ -127,7 +127,7 @@ export default function Home() {
       }
     }
     prevPagination.current = pagination;
-  }, [page, pagination])
+  }, [page, pagination]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
 
   return (
@@ -167,4 +167,13 @@ export default function Home() {
       <Login show={openLogin && !isAuthenticated} onLogin={(isSuccess, token) => {setIsAuthenticated(isSuccess);setAuthToken(token)}} onClose={() => setOpenLogin(false)} />
     </main>
   )
+}
+
+
+export async function getStaticProps() {
+  return {
+    props: {
+      products: []
+    }
+  }
 }

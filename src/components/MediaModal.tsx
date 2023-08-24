@@ -2,7 +2,7 @@ import { getDisplayDetails, getRatingAggr } from "./MediaCard";
 import { MediaObj, StreamObj } from "./MediaTypes";
 import { Back, Star1, HeartAdd, Play, PlayCircle, VolumeHigh, MessageText1, Size, Barcode, PlayCricle, Document, Clock } from "iconsax-react";
 import { useState, useEffect } from "react";
-import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig } from "./constants";
+import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig, proxyUrl } from "./constants";
 import axios from "axios";
 import Skeleton from "react-loading-skeleton";
 import { HashLoader } from "react-spinners";
@@ -177,6 +177,13 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
         console.log(event)
     }
 
+    function transformMediaUrl(originalUrl: string) {
+        const modifiedUrl = originalUrl.replace(/https:\/\/\d+\.dl\.wsfiles\.cz/, proxyUrl);
+        console.log(modifiedUrl)
+
+        return modifiedUrl;
+    }
+
     useEffect(() => {
         if (!media._streams) {
             axios.get(MEDIA_ENDPOINT + `/api/media/${media._id}/streams`, {
@@ -185,22 +192,22 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                 }
             })
             .then(function (response) {
-                console.log(response.data);
+                // console.log(response.data);
                 setStreams(response.data);
             })
         }
-    }, [])
+    }, []) /* eslint-disable-line react-hooks/exhaustive-deps */
 
     useEffect(() => {
         streamClasses.forEach((streamClass) => setWidths(streamClass))
-    }, [streams])
+    }, [streams]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
     async function handleStreamPlay(stream: StreamObj) {
         setIsLoadingUrl(true);
         setSelectedStream(stream);
         const mediaLink = await getStreamUrl(authToken, stream);
         if (mediaLink) {
-            console.log(mediaLink)
+            // console.log(mediaLink)
             setMediaUrl(mediaLink)
         };
         setIsLoadingUrl(false);
@@ -216,7 +223,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
             </button>
 
             <div className="flex justify-center gap-20 h-full">
-                { <img src={displayDetails.art.poster} className="w-[500px] h-full object-cover rounded-[30px]" /> || <Skeleton width={500} height="100%" /> }
+                { <img src={displayDetails.art.poster} className="w-[500px] h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */ }
 
                 <div className="py-10 text-gray-300 overflow-y-scroll hide-scrollbar relative"> {/* max-w-[620px] */}
                     <div className="max-w-[620px]">
@@ -319,12 +326,18 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                 <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
                     {/* <MediaPlayer
                         title={displayDetails?.title || movieDetails.info_labels?.originaltitle}
-                        src={mediaUrl}
+                        src={mediaUrl.length ? transformMediaUrl(mediaUrl) : ""}
+                        // src={[{
+                        //         src: mediaUrl.length ? transformMediaUrl(mediaUrl) : "",
+                        //         type: "video/mp4; codecs=avc1.42E01E, mp4a.40.2"
+                        //     }
+                        // ]}
                         poster={displayDetails.art.poster}
                         // thumbnails="https://media-files.vidstack.io/sprite-fight/thumbnails.vtt"
                         aspectRatio={selectedStream?.video[0].aspect || 16 / 9}
                         crossorigin="anonymous"
                         autoplay={true}
+                        controls={true}
                         onCanLoad={onMediaCanLoad}
                     >
                         <MediaOutlet>
@@ -344,22 +357,21 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
                     <video
                         id="my-video"
-                        className="video-js"
+                        className="video-js h-[calc(100%-10px)]"
                         controls
                         preload="auto"
                         width="100%"
-                        height="100%"
                         data-setup="{}"
-                        src={mediaUrl}
+                        src={transformMediaUrl(mediaUrl)}
                     >
+                    </video>
                         {/* <p className="vjs-no-js">
                         To view this video please enable JavaScript, and consider upgrading to a
                         web browser that
                             <a href="https://videojs.com/html5-video-support/" target="_blank">
                                 supports HTML5 video
                             </a>
-                        </p> */}
-                    </video>
+                    </p> */}
 
                     <button className="w-10 h-10 bg-yellow-200 absolute top-0 right-0 z-[99999] flex items-center justify-center" onClick={() => setMediaUrl("")}>
                         <Back variant="Bold" />

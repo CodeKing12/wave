@@ -32,5 +32,8 @@
   },
   "devDependencies": {
     "@types/video-react": "^0.15.1"
+  },
+  "next": {
+    "outDir": "build"
   }
 }

@@ -74,9 +74,11 @@ export default function MediaCard({ media, showMediaInfo }: any) {
     return (
       <div className="w-[240px] h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative">
         {
+            /* eslint-disable @next/next/no-img-element */
             displayDetails?.art?.poster ?
-            <Image width={240} height={330} className="w-full h-[330px] object-cover rounded-xl opacity-75" src={displayDetails?.art.poster} alt={displayDetails?.plot} />
-            : <ImageIcon size={85} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear    duration-500" variant="Broken" />
+            <img width={240} height={330} className="w-full h-[330px] object-cover rounded-xl opacity-75" src={displayDetails?.art.poster} alt={displayDetails?.plot} />
+            : <ImageIcon size={85} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
+            /* eslint-enable @next/next/no-img-element */
         }
         <div className="w-full h-full absolute bottom-0 py-5 px-3 text-gray-100 bg-black bg-opacity-80 rounded-[11px] opacity-0 group-hover:opacity-100 invisible group-hover:visible ease-in-out duration-[400ms]" onClick={() => showMediaInfo(true)}>
             <div className="flex flex-col justify-between h-full">
