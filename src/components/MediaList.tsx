@@ -3,6 +3,7 @@ import MediaModal from "./MediaModal";
 import { MediaObj } from "./MediaTypes";
 import { useState } from "react";
 import DemoMedia from "@/media.json"
+import Transition from "./Transition";
 
 export default function MediaList({ media, isAuthenticated, authToken, onMovieSelect }: any) {
     console.log(media)
@@ -24,7 +25,16 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
                 }
             </div>
 
-            { openModal && <MediaModal show={openModal && isAuthenticated} media={selectedMedia} authToken={authToken} onExit={() => setOpenModal(false)} /> }
+            <Transition>
+                <MediaModal show={openModal && isAuthenticated} media={selectedMedia} authToken={authToken} onExit={() => setOpenModal(false)} />
+            </Transition>
+            {/* { 
+                openModal ? 
+                <Transition>
+                    <MediaModal show={openModal && isAuthenticated} media={selectedMedia} authToken={authToken} onExit={() => setOpenModal(false)} />
+                </Transition>
+                : ""
+            } */}
         </>
     )
 } 

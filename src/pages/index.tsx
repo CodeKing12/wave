@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import Sidebar, { PageType } from '@/components/Sidebar'
-import { SearchNormal1, ArrowLeft, ArrowRight } from "iconsax-react"
+import { SearchNormal1, ArrowLeft, ArrowRight, SearchNormal } from "iconsax-react"
 import axios from 'axios';
 import { MEDIA_ENDPOINT, PATH_ANIMATED_MOVIES, PATH_ANIMATED_SERIES, PATH_CONCERTS, PATH_FAIRY_TALES, PATH_MOVIES, PATH_MOVIES_CZSK, PATH_SERIES, PATH_SERIES_CZSK, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE } from '@/components/constants';
 import { useEffect, useState, useRef } from 'react';
@@ -44,9 +44,12 @@ function Navbar() {
         <a className="cursor-pointer">Watched</a>
       </div>
 
-      <form className="relative">
-        <input className="w-[350px] h-14 px-4 pl-14 py-3 text-white text-sm bg-gray-700 bg-opacity-10 rounded-xl border border-[rgba(249,249,249,0.10)] placeholder:text-gray-300 placeholder:text-sm outline-none" placeholder="Search Movies or TV Shows" />
+      <form className="relative group">
+        <input className="w-[350px] h-14 px-14 py-3 text-white text-sm bg-gray-700 bg-opacity-10 rounded-xl border border-[rgba(249,249,249,0.10)] placeholder:text-gray-300 placeholder:text-sm outline-none" placeholder="Search Movies or TV Shows" />
         <SearchNormal1 size={24} color="#AEAFB2" className="absolute top-1/2 -translate-y-1/2 left-4" />
+        <button className="w-8 h-8 bg-yellow-300 rounded-lg absolute top-1/2 -translate-y-1/2 right-4 flex items-center justify-center opacity-0 invisible group-hover:visible group-hover:opacity-100 ease-in-out">
+          <SearchNormal variant="Bold" size={16} />
+        </button>
       </form>
     </nav>
   )
@@ -61,6 +64,7 @@ export default function Home() {
   const [page, setPage] = useState<PageType>("movies");
   const [totals, setTotals] = useState<PaginationType>({} as PaginationType);
   const [pagination, setPagination] = useState<PaginationType>({} as PaginationType);
+  const [hideSidebar, setHideSidebar] = useState(false);
   const prevPagination = useRef(pagination)
 
   useEffect(() => {
@@ -129,12 +133,11 @@ export default function Home() {
     prevPagination.current = pagination;
   }, [page, pagination]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
-
   return (
-    <main>
-      <Sidebar current={page} onChange={setPage} />
+    <main className="bg-[#191919]">
+      <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} onHide={setHideSidebar} />
 
-      <section className="flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins" id="main-display">
+      <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins duration-300 ease-in-out ${hideSidebar ? "!ml-0" : ""}`} id="main-display">
         <Navbar />
         
         <div className="relative flex-1 mt-6">

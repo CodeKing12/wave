@@ -1,6 +1,6 @@
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
 import { MediaObj, StreamObj } from "./MediaTypes";
-import { Back, Star1, HeartAdd, Play, PlayCircle, VolumeHigh, MessageText1, Size, Barcode, PlayCricle, Document, Clock } from "iconsax-react";
+import { Back, Star1, HeartAdd, Play, PlayCircle, VolumeHigh, MessageText1, Size, Barcode, PlayCricle, Document, Clock, Image as ImageIcon } from "iconsax-react";
 import { useState, useEffect } from "react";
 import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig, proxyUrl } from "./constants";
 import axios from "axios";
@@ -185,6 +185,10 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
     }
 
     useEffect(() => {
+        let modalContent = document.querySelector(".modal-content")
+        if (modalContent) {
+            modalContent.scrollTop = 0
+        }
         if (!media._streams) {
             axios.get(MEDIA_ENDPOINT + `/api/media/${media._id}/streams`, {
                 params: {
@@ -196,11 +200,11 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                 setStreams(response.data);
             })
         }
-    }, []) /* eslint-disable-line react-hooks/exhaustive-deps */
+    }, [media._id]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
     useEffect(() => {
         streamClasses.forEach((streamClass) => setWidths(streamClass))
-    }, [streams]) /* eslint-disable-line react-hooks/exhaustive-deps */
+    }, [media._id, streams]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
     async function handleStreamPlay(stream: StreamObj) {
         setIsLoadingUrl(true);
@@ -217,15 +221,21 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
     // rating = ; // To get the rating as a fraction of 10. (Multiplying by 2 undoes the dividing by 2 in the getRatingAggr function)
 
     return (
-        <div className={`fixed top-0 bottom-0 left-0 right-0 w-full h-full z-50 p-10 bg-black-1 ease-linear duration-300 opacity-0 invisible ${show ? "!opacity-100 !visible" : ""}`}>
+        <div className={`modal-root fixed top-0 bottom-0 left-0 right-0 w-full h-full z-50 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 ${show ? "!translate-x-0 !opacity-100 !visible" : ""}`}>
             <button className="absolute top-0 right-0 bg-yellow-300 text-black-1 w-14 h-14 flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 border-[3px] border-yellow-300" onClick={onExit}>
                 <Back size={30} variant="Bold" />
             </button>
 
             <div className="flex justify-center gap-20 h-full">
-                { <img src={displayDetails.art.poster} className="w-[500px] h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */ }
+                <div className="w-[500px] h-full relative bg-[#191919] rounded-[30px] bg-opacity-75">
+                    {
+                        displayDetails?.art?.poster ?
+                        <img src={displayDetails.art.poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
+                        : <ImageIcon size={170} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
+                    }
+                </div>
 
-                <div className="py-10 text-gray-300 overflow-y-scroll hide-scrollbar relative"> {/* max-w-[620px] */}
+                <div className="modal-content py-10 text-gray-300 overflow-y-scroll hide-scrollbar relative"> {/* max-w-[620px] */}
                     <div className="max-w-[620px]">
                         <h2 className="font-semibold text-white opacity-90 text-4xl mb-6">{ movieTitle }</h2>
                         <p className="max-w-[600px] leading-loose mb-8">
@@ -296,12 +306,12 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                         }
                     </div>
 
-                    <div className="mt-12 mb-16">
+                    <div className={`mt-12 mb-16 ${streams.length ? "" : "w-[600px]"}`}>
                         <p className="text-base opacity-60 text-center mb-5">Available Streams</p>
                         <div className="flex flex-col gap-10">
                             {
                                 streams.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onStreamClick={() => handleStreamPlay(stream)} />)
-                                : <HashLoader size={45} speedMultiplier={1.2} color="#fde047" loading={true} className="relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
                             }
                         </div>
                     </div>

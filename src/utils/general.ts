@@ -25,9 +25,10 @@ export function normalizeLanguage(source?: string):string {
 
 export function setWidths(selector: string) {
     const items = document.querySelectorAll<HTMLElement>(selector);
-    const maxWWidth = Math.max(...Array.from(items).map(item => item.offsetWidth));
+    const maxWWidth = Math.max(...Array.from(items).map(item => {console.log(item.offsetWidth);return item.offsetWidth}));
     items.forEach(item => {
-      item.style.width = maxWWidth + 'px';
+        item.style.width = (maxWWidth > 110 ? 110 : maxWWidth) + 'px';
+        console.log(maxWWidth, item.style.width)
     });
 }
 

@@ -30,3 +30,13 @@ a, button, input {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+.subtitles, .audio {
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.effect-1,
+.effect-2 {
+  overflow: hidden;
+}
