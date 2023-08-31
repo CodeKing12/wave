@@ -81,7 +81,7 @@ export interface Art {
     banner?: string;
 }
 
-export type InfoLabels = {
+export interface BaseInfoLabels {
     originaltitle: string;
     genre: string[];
     year: number;
@@ -92,9 +92,18 @@ export type InfoLabels = {
     dateadded: string;
     mediatype: string;
     country: (string | null)[];
-    status: string;
     duration: number;
 };
+
+export interface MediaInfoLabels extends BaseInfoLabels {
+    status: string;
+}
+
+export interface SeriesInfoLabels extends BaseInfoLabels {
+    aired: string;
+    season?: number;
+    episode?: number;
+}
 
 export interface I18nInfoLabel {
     lang: string;
@@ -104,6 +113,10 @@ export interface I18nInfoLabel {
     art: Art;
 }
 
+export interface SeriesI18nInfoLabel extends I18nInfoLabel {
+    parent_titles: string[];
+}
+
 export interface LanguageInfo {
     lang: string;
     date_added: string;
@@ -111,14 +124,14 @@ export interface LanguageInfo {
 
 export interface AvailableStreams {
     languages: {
-    audio: {
-        items: LanguageInfo[];
-        map: string[];
-    };
-    subtitles: {
-        items: LanguageInfo[];
-        map: string[];
-    };
+        audio: {
+            items: LanguageInfo[];
+            map: string[];
+        };
+        subtitles: {
+            items: LanguageInfo[];
+            map: string[];
+        };
     };
     count: number;
 }
@@ -138,7 +151,7 @@ export interface ApiSource {
     // ... other properties
     cast: Person[];
     i18n_info_labels: I18nInfoLabel[];
-    info_labels: InfoLabels;
+    info_labels: MediaInfoLabels;
     available_streams: AvailableStreams;
 }
 
@@ -152,5 +165,47 @@ export interface MediaObj {
     _score: null;
     _source: ApiSource;
     _streams?: StreamObj[];
+    sort: number[];
+}
+
+export interface SeriesParentInfoLabel {
+    originaltitle: string[];
+}
+
+export interface SeasonSource {
+    parent_id: string;
+    networks: string[];
+    cast: Cast[];
+    i18n_info_labels: SeriesI18nInfoLabel[];
+    info_labels: SeriesInfoLabels;
+    available_streams: AvailableStreams;
+    children_count: number;
+    collections: any[];
+    languages: string[];
+    parent_info_labels: SeriesParentInfoLabel;
+    play_count: number;
+    popularity: number;
+    premieres: any[];
+    ratings: RatingObj;
+    root_parent: string;
+    services: {
+        [name: string]: string
+    };
+    stream_info: {
+        audio: AudioStream[];
+        video: VideoStream[];
+        subtitles: Subtitle[];
+    };
+    tags: any[];
+    total_children_count: number;
+    trending: number;
+    videos: any[];
+}
+
+export interface SeriesObj {
+    _index: string;
+    _id: string;
+    _score: null;
+    _source: SeasonSource;
     sort: number[];
 }

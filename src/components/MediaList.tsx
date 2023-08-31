@@ -6,7 +6,7 @@ import DemoMedia from "@/media.json"
 import Transition from "./Transition";
 
 export default function MediaList({ media, isAuthenticated, authToken, onMovieSelect }: any) {
-    console.log(media)
+    // console.log(media)
     const [selectedMedia, setSelectedMedia] = useState<MediaObj>(DemoMedia);
     const [openModal, setOpenModal] = useState(false);
 
@@ -17,7 +17,7 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
 
     return (
         <>
-            <div className={`flex flex-wrap gap-4 ${openModal ? "hidden" : ""}`}>
+            <div className={`flex justify-center flex-wrap gap-4 ${openModal ? "hidden" : ""}`}>
                 {
                     media.length ? media.map((show: MediaObj, index: number) => (
                         <MediaCard key={index} media={show?._source} showMediaInfo={() => isAuthenticated ? displayMediaInfo(show) : onMovieSelect(true)} />

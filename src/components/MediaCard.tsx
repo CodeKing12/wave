@@ -1,8 +1,5 @@
-import Show from "@/images/show-3.jpeg";
 import { Heart, Star1, Image as ImageIcon } from "iconsax-react";
 import { I18nInfoLabel, RatingObj } from "./MediaTypes"
-import Image from "next/image";
-import { useState } from "react";
 
 
 export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
@@ -23,8 +20,6 @@ export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
         if (!selectedObject) {
             selectedObject = mediaI18n[0];
         }
-
-        // console.log(selectedObject, selectedDetails)
 
         selectedDetails = selectedObject;
     }

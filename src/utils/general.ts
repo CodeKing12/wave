@@ -1,4 +1,10 @@
-import { LeanMediaStream, StreamObj, VideoStream } from "@/components/MediaTypes";
+import { LeanMediaStream, MediaObj, SeriesObj, StreamObj, VideoStream } from "@/components/MediaTypes";
+import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig } from "@/components/constants";
+import { parseXml } from "@/pages";
+import axios from "axios";
+import { stream_p } from "./Stream";
+import { md5crypt } from "./MD5";
+import { sha1 } from "./Sha";
 
 export function uuidv4():string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -25,10 +31,9 @@ export function normalizeLanguage(source?: string):string {
 
 export function setWidths(selector: string) {
     const items = document.querySelectorAll<HTMLElement>(selector);
-    const maxWWidth = Math.max(...Array.from(items).map(item => {console.log(item.offsetWidth);return item.offsetWidth}));
+    const maxWWidth = Math.max(...Array.from(items).map(item => item.offsetWidth));
     items.forEach(item => {
         item.style.width = (maxWWidth > 110 ? 110 : maxWWidth) + 'px';
-        console.log(maxWWidth, item.style.width)
     });
 }
 
@@ -106,4 +111,77 @@ export function secondsToHMS(seconds: number) {
     
     const formattedTime = `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
     return formattedTime;
+}
+
+
+export async function getFilePasswordSalt(ident: string): Promise<string> {
+    try {
+        const response = await axios.post(AUTH_ENDPOINT + PATH_FILE_PASSWORD_SALT, { ident }, authAxiosConfig);
+        return parseXml(response.data, "salt");
+    } catch (error) {
+        console.log("An error occured while getting the salt: ", error);
+        return ""; // Return an empty string or handle the error appropriately
+    }
+}
+
+
+export async function getVideoLink(ident: string, token: string, https: boolean, password?: string) {
+    const UUID = getUUID();
+
+    try {
+        let response = await axios.post(AUTH_ENDPOINT + PATH_FILE_LINK, {
+            ident,
+            wst: token,
+            device_uuid: UUID,
+            force_https: https ? 1 : 0,
+            download_type: "video_stream",
+            device_vendor: "ymovie",
+            password
+        }, authAxiosConfig)
+
+        const link = parseXml(response.data, "link")
+        // console.log(link);
+        return link;
+    } catch (error) {
+        console.log(error);
+        return "Unable to get video link";
+    }
+}
+
+export async function getStreamUrl(token: string, stream: StreamObj) {
+    const https = document.location.protocol === "https:";
+    const ident = stream.ident;
+    const leanStream = transformStreamObj(stream);
+
+    try {
+        const response = await axios.post(AUTH_ENDPOINT + PATH_FILE_PROTECTED, { ident }, authAxiosConfig);
+        const isProtected = parseXml(response.data, "protected") === "1";
+
+        if (isProtected) {
+            const salt = await getFilePasswordSalt(ident);
+            const password = sha1(md5crypt(stream_p(leanStream), salt));
+            const mediaUrl = await getVideoLink(ident, token, https, password)
+            return mediaUrl;
+        } else {
+            const mediaUrl = await getVideoLink(ident, token, https);
+            return mediaUrl;
+        }
+
+    } catch (error) {
+        console.error("An error occurred:", error);
+    }
+}
+
+export async function getMediaStreams(media: MediaObj | SeriesObj) {
+    try {
+        let response = await axios.get(MEDIA_ENDPOINT + `/api/media/${media._id}/streams`, {
+            params: {
+                [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
+            }
+        })
+        return response.data;
+    } catch(error) {
+        console.log(error)
+        return [];
+    }
 }

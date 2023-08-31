@@ -1,19 +1,15 @@
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
-import { MediaObj, StreamObj } from "./MediaTypes";
-import { Back, Star1, HeartAdd, Play, PlayCircle, VolumeHigh, MessageText1, Size, Barcode, PlayCricle, Document, Clock, Image as ImageIcon } from "iconsax-react";
+import { MediaObj, SeriesObj, StreamObj } from "./MediaTypes";
+import { Back, Star1, HeartAdd, Play, PlayCircle, VolumeHigh, MessageText1, Size, Barcode, PlayCricle, Document, Clock, Image as ImageIcon, Backward } from "iconsax-react";
 import { useState, useEffect } from "react";
-import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig, proxyUrl } from "./constants";
+import {MEDIA_ENDPOINT, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, proxyUrl } from "./constants";
 import axios from "axios";
 import Skeleton from "react-loading-skeleton";
 import { HashLoader } from "react-spinners";
-import { parseXml } from "@/pages";
-import { sha1 } from "@/utils/Sha";
-import { md5crypt } from "@/utils/MD5";
-import { bytesToSize, convertSecondsToTime, formatDate, getUUID, secondsToHMS, setWidths, transformStreamObj } from "@/utils/general";
-import { stream_p } from "@/utils/Stream";
+import { bytesToSize, convertSecondsToTime, formatDate, getMediaStreams, getStreamUrl, getUUID, secondsToHMS, setWidths, transformStreamObj } from "@/utils/general";
 import 'vidstack/styles/defaults.css';
 import 'vidstack/styles/community-skin/video.css';
-import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster } from '@vidstack/react';
+// import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster } from '@vidstack/react';
 
 interface MediaModalProps {
     show: boolean;
@@ -22,68 +18,95 @@ interface MediaModalProps {
     onExit: () => void;
 }
 
-async function getFilePasswordSalt(ident: string): Promise<string> {
-    try {
-        const response = await axios.post(AUTH_ENDPOINT + PATH_FILE_PASSWORD_SALT, { ident }, authAxiosConfig);
-        return parseXml(response.data, "salt");
-    } catch (error) {
-        console.log("An error occured while getting the salt: ", error);
-        return ""; // Return an empty string or handle the error appropriately
+interface SeasonProps {
+    season: SeriesObj;
+    onClick: () => void;
+}
+
+interface SeriesData {
+    [mediaId: string]: SeriesObj[];
+}
+
+interface SeriesStreamObj {
+    [seasonId: string]: {
+        [episodeId: string]: StreamObj
     }
 }
 
 
-async function getVideoLink(ident: string, token: string, https: boolean, password?: string) {
-    const UUID = getUUID();
+function Season({ season, onClick }: SeasonProps) {
+    const seasonDetails = getDisplayDetails(season._source.i18n_info_labels)
+    const mediaType = season._source.info_labels.mediatype;
+    let { rating, voteCount } = getRatingAggr(season._source.ratings);
+    // console.log(seasonDetails, season)
 
-    try {
-        let response = await axios.post(AUTH_ENDPOINT + PATH_FILE_LINK, {
-            ident,
-            wst: token,
-            device_uuid: UUID,
-            force_https: https ? 1 : 0,
-            download_type: "video_stream",
-            device_vendor: "ymovie",
-            password
-        }, authAxiosConfig)
-
-        const link = parseXml(response.data, "link")
-        console.log(link);
-        return link;
-    } catch (error) {
-        console.log(error);
-        return "Unable to get video link";
-        // const errorMsg = parseXml(response.data, "message");
-        // console.log("File Link Error: ", errorMsg);
-        // return errorMsg;
-    }
+    return (
+        mediaType === "season" ? 
+        <div className="w-[170px] h-[250px] relative rounded-xl cursor-pointer" onClick={onClick}>
+            {
+                seasonDetails.art.poster ? <img className="absolute top-0 bottom-0 left-0 right-0 w-full h-full rounded-xl" src={seasonDetails?.art.poster} alt={seasonDetails?.plot} /> : ""
+            }
+            {
+                // mediaType === "episode" ?
+                // <h4 className="rounded-tl-xl absolute top-0 left-0 bg-yellow-500 bg-opacity-80 text-black-1 font-semibold text-sm py-1 px-2">Episode { season._source.info_labels.episode }</h4> 
+                // : ""
+            }
+            <div className="w-full bg-black bg-opacity-80 px-3 py-3 text-white absolute bottom-0 rounded-b-[11px]">
+                <h4>{mediaType === "season" ? season._source.info_labels.originaltitle || `Season ${season._source.info_labels.season}` : mediaType === "episode" ? seasonDetails.title : ""}</h4>
+            </div>
+        </div> :
+        <article className="flex items-center space-x-6 px-6 py-4 border-2 border-transparent hover:border-yellow-300 rounded-xl duration-500 ease-in-out w-full">
+            <img src={seasonDetails?.art.poster} alt="" width="60" height="50" className="flex-none rounded-md bg-slate-100 w-16 h-20 object-cover" />
+            <div className="min-w-0 relative flex-auto">
+                <h2 className="font-semibold text-white text-opacity-80 truncate mr-28">{ seasonDetails.title || `Season ${season._source.info_labels.season}: Episode ${season._source.info_labels.episode}` }</h2>
+                <dl className="mt-2.5 flex flex-wrap text-sm leading-6 font-medium text-gray-300 text-opacity-90">
+                    <div className="absolute top-0 right-0 flex items-center space-x-1">
+                        <dt className="fill-yellow-300">
+                            <span className="sr-only">Star rating</span>
+                            <svg className="" width="16" height="20">
+                                <path d="M7.05 3.691c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.372 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118L.98 9.483c-.784-.57-.381-1.81.587-1.81H5.03a1 1 0 00.95-.69L7.05 3.69z" />
+                            </svg>
+                        </dt>
+                        <dd>{rating.toFixed(1)}</dd>
+                    </div>
+                    <div>
+                        <dt className="sr-only">Episode Number</dt>
+                        <dd className="px-1.5 ring-1 ring-slate-200 rounded">S{season._source.info_labels.season || 1} E{season._source.info_labels.episode?.toString().padStart(2, "0")}</dd>
+                    </div>
+                    <div className="ml-2">
+                        <dt className="sr-only">Aired</dt>
+                        <dd>{season._source.info_labels.aired}</dd>
+                    </div>
+                    {/* <div>
+                        <dt className="sr-only">Episode</dt>
+                        <dd className="flex items-center">
+                            <svg width="2" height="2" fill="currentColor" className="mx-2 text-slate-300" aria-hidden="true">
+                                <circle cx="1" cy="1" r="1" />
+                            </svg>
+                            Episode { season._source.info_labels.episode }
+                        </dd>
+                    </div> */}
+                    <div>
+                        <dt className="sr-only">Runtime</dt>
+                        <dd className="flex items-center">
+                            <svg width="2" height="2" fill="currentColor" className="mx-2 text-slate-300" aria-hidden="true">
+                                <circle cx="1" cy="1" r="1" />
+                            </svg>
+                            { convertSecondsToTime(season._source.info_labels.duration) }
+                        </dd>
+                    </div>
+                    {/* <div className="flex-none w-full mt-2 font-normal">
+                        <dt className="sr-only">Cast</dt>
+                        <dd className="text-gray-300">{ season._source.cast.map(actor => actor.name).join(", ") }</dd>
+                    </div> */}
+                </dl>
+            </div>
+            <button className="h-full min-w-[48px] w-12 border-black-1 bg-yellow-300 text-black-1 rounded-md text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex justify-center items-center !ml-10" onClick={onClick}>
+                <PlayCircle size={28} variant="Bold" />
+            </button>
+        </article>
+    )
 }
-
-async function getStreamUrl(token: string, stream: StreamObj) {
-    const https = document.location.protocol === "https:";
-    const ident = stream.ident;
-    const leanStream = transformStreamObj(stream);
-
-    try {
-        const response = await axios.post(AUTH_ENDPOINT + PATH_FILE_PROTECTED, { ident }, authAxiosConfig);
-        const isProtected = parseXml(response.data, "protected") === "1";
-        console.log(parseXml(response.data, "protected"))
-        console.log(parseXml(response.data, "protected") === "1")
-
-        if (isProtected) {
-            const salt = await getFilePasswordSalt(ident);
-            const password = sha1(md5crypt(stream_p(leanStream), salt));
-            const mediaUrl = await getVideoLink(ident, token, https, password)
-            return mediaUrl;
-        } else {
-            const mediaUrl = await getVideoLink(ident, token, https);
-            return mediaUrl;
-        }
-
-    } catch (error) {
-        console.error("An error occurred:", error);
-    }
-}  
 
 
 function MediaStreamOption({ stream, onStreamClick }: { stream: StreamObj, onStreamClick: () => void }) {
@@ -115,7 +138,7 @@ function MediaStreamOption({ stream, onStreamClick }: { stream: StreamObj, onStr
                         <VolumeHigh size={22} variant="Bold" className="text-white text-opacity-70" />
                         <p>
                             {
-                                stream.audio.map(audio => audio.language.toUpperCase()).join("/")
+                                stream.audio.map(audio => audio?.language?.toUpperCase() || "").join("/")
                             }
                         </p>
                     </div> : ""
@@ -165,7 +188,13 @@ function MediaStreamOption({ stream, onStreamClick }: { stream: StreamObj, onStr
 export default function MediaModal({ show, media, authToken, onExit }: MediaModalProps) {
     const displayDetails = getDisplayDetails(media._source.i18n_info_labels)
     const movieDetails = media._source;
+    const [showEpisodes, setShowEpisodes] = useState(false);
     const [streams, setStreams] = useState([]);
+    const [episodeStreams, setEpisodeStreams] = useState<SeriesStreamObj>({});
+    const [seasons, setSeasons] = useState<SeriesData>({});
+    const [selectedSeason, setSelectedSeason] = useState<SeriesObj>();
+    const [selectedEpisode, setSelectedEpisode] = useState();
+    const [episodes, setEpisodes] = useState<SeriesData>({});
     const [selectedStream, setSelectedStream] = useState<StreamObj | undefined>();
     const [mediaUrl, setMediaUrl] = useState("");
     let { rating, voteCount } = getRatingAggr(movieDetails.ratings);
@@ -179,27 +208,55 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
     function transformMediaUrl(originalUrl: string) {
         const modifiedUrl = originalUrl.replace(/https:\/\/\d+\.dl\.wsfiles\.cz/, proxyUrl);
-        console.log(modifiedUrl)
-
         return modifiedUrl;
     }
 
-    useEffect(() => {
-        let modalContent = document.querySelector(".modal-content")
-        if (modalContent) {
-            modalContent.scrollTop = 0
-        }
-        if (!media._streams) {
-            axios.get(MEDIA_ENDPOINT + `/api/media/${media._id}/streams`, {
+    async function getEpisodes(season: SeriesObj) {
+        try {
+            const response = await axios.get(MEDIA_ENDPOINT + `/api/media/filter/v2/parent?sort=episode`, {
                 params: {
+                    value: season._id,
                     [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
                 }
             })
-            .then(function (response) {
-                // console.log(response.data);
-                setStreams(response.data);
-            })
+            console.log(response.data.hits.hits);
+            return response.data.hits.hits;
+        } catch(error) {
+            console.log(error);
+            return null;
         }
+    }
+
+    useEffect(() => {
+        async function fetchModalData () {
+            let modalContent = document.querySelector(".modal-content")
+            if (modalContent) {
+                modalContent.scrollTop = 0
+            }
+            if (movieDetails.info_labels.mediatype === "tvshow") {
+                axios.get(MEDIA_ENDPOINT + `/api/media/filter/v2/parent?sort=episode`, {
+                    params: {
+                        value: media._id,
+                        [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
+                    }
+                })
+                .then(function (response) {
+                    console.log(response.data.hits.hits);
+                    setSeasons((prevSeasons) => {
+                        return {
+                            ...prevSeasons,
+                            [media._id]: response.data.hits.hits
+                        }
+                    });
+                })
+            } else {
+                if (!media._streams) {
+                    const mediaStreams = await getMediaStreams(media);
+                    setStreams(mediaStreams);
+                }
+            }
+        }
+        fetchModalData();
     }, [media._id]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
     useEffect(() => {
@@ -217,17 +274,52 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
         setIsLoadingUrl(false);
     }
 
+    async function onSeasonClick(season: SeriesObj) {
+        setShowEpisodes(true);
+        setSelectedSeason(season);
+        let seasonEpisodes = episodes[season._id];
+        if (!seasonEpisodes) {
+            seasonEpisodes = await getEpisodes(season);
+        }
+        setEpisodes({ ...episodes, [season._id]: seasonEpisodes });
+    }
+
+    async function getEpisodeStreams(episode: SeriesObj) {
+        const episodeStreams = await getMediaStreams(episode);
+        // const streamObjKey = selectedSeason?._id + "__" + episode._id
+        if (selectedSeason) {
+            setEpisodeStreams((prevStreams) => {
+                return {
+                    ...prevStreams,
+                    [selectedSeason._id]: {
+                        ...prevStreams[selectedSeason._id],
+                        ...episodeStreams
+                    }
+                }
+            });
+        }
+        console.log(episodeStreams)
+    }
+
+    function exitModal() {
+        onExit();
+        // setTimeout(() => {
+        setSelectedSeason(undefined);
+        setSelectedEpisode(undefined);
+        setShowEpisodes(false);
+        // }, 600)
+    }
 
     // rating = ; // To get the rating as a fraction of 10. (Multiplying by 2 undoes the dividing by 2 in the getRatingAggr function)
 
     return (
         <div className={`modal-root fixed top-0 bottom-0 left-0 right-0 w-full h-full z-50 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 ${show ? "!translate-x-0 !opacity-100 !visible" : ""}`}>
-            <button className="absolute top-0 right-0 bg-yellow-300 text-black-1 w-14 h-14 flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 border-[3px] border-yellow-300" onClick={onExit}>
+            <button className="absolute top-0 right-0 bg-yellow-300 text-black-1 w-14 h-14 flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 border-[3px] border-yellow-300" onClick={exitModal}>
                 <Back size={30} variant="Bold" />
             </button>
 
             <div className="flex justify-center gap-20 h-full">
-                <div className="w-[500px] h-full relative bg-[#191919] rounded-[30px] bg-opacity-75">
+                <div className="min-w-[500px] w-[500px] h-full relative bg-[#191919] rounded-[30px] bg-opacity-75">
                     {
                         displayDetails?.art?.poster ?
                         <img src={displayDetails.art.poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
@@ -306,15 +398,19 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                         }
                     </div>
 
-                    <div className={`mt-12 mb-16 ${streams.length ? "" : "w-[600px]"}`}>
-                        <p className="text-base opacity-60 text-center mb-5">Available Streams</p>
-                        <div className="flex flex-col gap-10">
-                            {
-                                streams.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onStreamClick={() => handleStreamPlay(stream)} />)
-                                : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                            }
-                        </div>
-                    </div>
+                    {
+                        movieDetails.info_labels.mediatype === "tvshow" ? "" : (
+                            <div className={`mt-12 mb-16 ${streams.length ? "" : "w-[600px]"}`}>
+                                <p className="text-base opacity-60 text-center mb-5">Available Streams</p>
+                                <div className="flex flex-col gap-10">
+                                    {
+                                        streams.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onStreamClick={() => handleStreamPlay(stream)} />)
+                                        : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                    }
+                                </div>
+                            </div>
+                        ) 
+                    }
 
                     <div className="flex gap-12 mt-10">
                         <button className="px-10 py-3 bg-white text-black-1 rounded-xl text-[15px] tracking-wide font-bold border-2 border-transparent hover:bg-opacity-5 hover:border-white hover:text-white flex items-center gap-4">
@@ -327,11 +423,38 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                             Watch
                         </button> */}
                     </div>
+
+                    {
+                        movieDetails.info_labels.mediatype === "tvshow" ? (
+                            <div className={`mt-12 mb-16 ${seasons[media._id]?.length ? "" : "w-[600px]"}`}>
+                                <p className="text-base opacity-60 text-center mb-5">Available Seasons</p>
+                                <div className="relative w-full min-h-[250px]">
+                                    <div className={`w-full absolute top-0 flex flex-wrap gap-8 duration-300 ease-in-out ${selectedSeason && episodes[selectedSeason?._id]?.length ? "opacity-0 invisible -translate-y-16" : ""}`}>
+                                        {
+                                            seasons[media._id]?.length ? seasons[media._id].map((season, index) => <Season key={index} season={season} onClick={() => onSeasonClick(season)} />)
+                                            : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                        }
+                                    </div>
+                                    <div className={`absolute top-0 flex gap-10 opacity-0 invisible translate-y-16 duration-500 ease-in-out ${showEpisodes && selectedSeason && episodes[selectedSeason?._id]?.length ? "!opacity-100 !visible !translate-y-0" : ""}`}>
+                                        {/* <button className="bg-yellow-300 text-black-1 w-10 h-full flex items-center justify-center">
+                                            <Backward />
+                                        </button> */}
+                                        <div className="flex flex-col gap-3 flex-wrap">
+                                            {
+                                                showEpisodes && selectedSeason && episodes[selectedSeason?._id]?.length ? episodes[selectedSeason._id].map((episode, index) => <Season key={index} season={episode} onClick={() => getEpisodeStreams(episode)} />)
+                                                : ""
+                                            }
+                                        </div>
+                                    </div>
+                                    <div className={`absolute w-full h-full top-0 bottom-0 rounded-xl backdrop-blur-sm flex items-center justify-center duration-300 ease-linear opacity-0 invisible ${showEpisodes && !episodes[selectedSeason?._id || ""] ? "!opacity-100 !visible" : ""}`}>
+                                        <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={showEpisodes} />
+                                    </div>
+                                </div>
+                            </div>
+                        ) : ""
+                    }
                 </div>
 
-                <div className={`absolute w-full h-full top-0 bottom-0 bg-black bg-opacity-40 backdrop-blur-md flex items-center justify-center duration-300 ease-linear opacity-0 invisible ${isLoadingUrl ? "!opacity-100 !visible" : ""}`}>
-                    <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={isLoadingUrl} />
-                </div>
 
                 <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
                     {/* <MediaPlayer
@@ -367,7 +490,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
                     <video
                         id="my-video"
-                        className="video-js h-[calc(100%-10px)]"
+                        className="h-[calc(100%-10px)]"
                         controls
                         preload="auto"
                         width="100%"

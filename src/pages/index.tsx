@@ -36,7 +36,11 @@ interface MediaType {
   [page: string]: MediaObj[][] | undefined
 };
 
-function Navbar() {
+interface NavProps {
+  onSearch: (search: string) => void;
+}
+
+function Navbar({ onSearch }: NavProps) {
   return (
     <nav className="flex items-center justify-between">
       <div className="flex gap-12 items-center text-white text-opacity-80 font-medium">
@@ -102,12 +106,9 @@ export default function Home() {
     if (!pagination.hasOwnProperty(page)) {
       updatePagination(page)
     }
-    // console.log("Got here")
     if (!media.hasOwnProperty(page) || pagination[page] > prevPagination.current[page]) {
-      // console.log("Next Check")
       if (pagination[page] >= (media[page]?.length ?? 0)) {
         setLoading(true);
-        // console.log("Passed all checks")
         axios.get(MEDIA_ENDPOINT + api_map[page], {
           params: {
             [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
@@ -125,7 +126,6 @@ export default function Home() {
               [page]: [...currentPage, response.data.hits.hits]
             }))
             setLoading(false);
-            // console.log(response.data.hits.hits)
           }
         )
       }
@@ -133,18 +133,19 @@ export default function Home() {
     prevPagination.current = pagination;
   }, [page, pagination]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
+  function searchMedia(search: string) {}
+
   return (
     <main className="bg-[#191919]">
       <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} onHide={setHideSidebar} />
 
       <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins duration-300 ease-in-out ${hideSidebar ? "!ml-0" : ""}`} id="main-display">
-        <Navbar />
+        <Navbar onSearch={searchMedia} />
         
         <div className="relative flex-1 mt-6">
-          {/* {console.log(media[page])} */}
           {
             media[page] && media[page]?.[pagination[page]]?.length ? 
-            <MovieList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => {console.log("Got here");setOpenLogin(true)}} page={page} media={media[page]?.[pagination[page]]} />
+            <MovieList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => setOpenLogin(true)} page={page} media={media[page]?.[pagination[page]]} />
             : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
           }
         </div>
