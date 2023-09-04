@@ -1,9 +1,8 @@
-import { Video, VideoVertical, MusicCircle, MagicStar, VideoOctagon, Magicpen, UserTag, Slider, ArrowLeft2, ArrowRight2 } from "iconsax-react"
-import { Icon } from "next/dist/lib/metadata/types/metadata-types"
+import { Video, VideoVertical, MusicCircle, MagicStar, VideoOctagon, Magicpen, UserTag, Slider, ArrowLeft2, ArrowRight2, SidebarLeft, SidebarRight, Logout } from "iconsax-react"
 import { ReactNode, useState } from "react"
 
 
-export type PageType = "" | "movies" | "series" | "concerts" | "fairy_tales" | "animated_movies" | "animated_series" | "movies_czsk" | "series_czsk";
+export type PageType = "" | "movies" | "series" | "concerts" | "fairy_tales" | "animated_movies" | "animated_series" | "movies_czsk" | "series_czsk" | "search";
 
 interface SidebarItemProps { 
     icon: ReactNode,
@@ -17,8 +16,9 @@ interface SidebarItemProps {
 interface SidebarProps {
     current: PageType,
     isHidden: boolean,
-    onHide: (isHidden: boolean) => void
-    onChange: (newVal: PageType) => void
+    onHide: (isHidden: boolean) => void,
+    onChange: (newVal: PageType) => void,
+    onLogout: () => void,
 }
 
 function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
@@ -33,18 +33,18 @@ function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
     )
 }
 
-export default function Sidebar({ current, isHidden, onHide, onChange }: SidebarProps) {
+export default function Sidebar({ current, isHidden, onHide, onChange, onLogout }: SidebarProps) {
     return (
-        <aside className={`w-[300px] bg-black-1 h-full min-h-screen fixed top-0 bottom-0 left-0 py-20 duration-500 ease-in-out ${isHidden ? "-translate-x-full" : ""}`}>
+        <aside className={`w-[300px] bg-black-1 h-full min-h-screen fixed top-0 bottom-0 left-0 pt-20 pb-6 duration-500 ease-in-out ${isHidden ? "-translate-x-full" : ""}`}>
             <button className={`bg-yellow-300 w-10 h-10 flex justify-center items-center absolute top-0 right-0 opacity-60 hover:opacity-100 ${isHidden ? "!-right-10" : ""}`} onClick={() => onHide(!isHidden)}>
                 {
                     isHidden ?
-                    <ArrowRight2 size={28} />
-                    : <ArrowLeft2 size={28} />
+                    <SidebarRight size={28} variant="Bulk" />
+                    : <SidebarLeft size={28} variant="Bulk" />
                 }
             </button>
             <div className={`duration-500 ease-in-out ${isHidden ? "opacity-0" : ""}`}>
-                <p className="font-semibold text-[rgba(249,249,249,0.67)] text-opacity-[67] mb-5 px-8">Categories</p>
+                <p className="font-semibold text-[rgba(249,249,249,0.67)] text-opacity-[67] mb-5 px-8 text-[15px]">Categories</p>
                 <div className="text-white fill-white flex flex-col gap-5">
                     <NavItem icon={<Video size={30} variant="Linear" />} text="Movies" page="movies" current={current} onItemClick={onChange} />
                     <NavItem icon={<VideoVertical size={30} variant="Linear" />} text="Series" page="series" current={current} onItemClick={onChange} />
@@ -56,6 +56,10 @@ export default function Sidebar({ current, isHidden, onHide, onChange }: Sidebar
                     <NavItem icon={<Slider size={30} variant="Linear" />} text="Series CZ/SK" page="series_czsk" current={current} onItemClick={onChange} />
                 </div>
             </div>
+            <button className="mt-auto text-opacity-70 text-white font-medium flex items-center gap-3 py-2 px-8 text-[17px] hover:text-yellow-300 group duration-500 ease-in-out absolute bottom-[18px]" onClick={onLogout}>
+                Logout
+                <Logout className="text-yellow-300 group-hover:text-white duration-500 ease-in-out" />
+            </button>
         </aside>
     )
 }

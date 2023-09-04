@@ -1,7 +1,7 @@
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
 import { MediaObj, SeriesObj, StreamObj } from "./MediaTypes";
-import { Back, Star1, HeartAdd, Play, PlayCircle, VolumeHigh, MessageText1, Size, Barcode, PlayCricle, Document, Clock, Image as ImageIcon, Backward } from "iconsax-react";
-import { useState, useEffect } from "react";
+import { Back, Star1, HeartAdd, Play, PlayCircle, VolumeHigh, MessageText1, Size, Barcode, VideoSlash, Document, Clock, Image as ImageIcon, Backward } from "iconsax-react";
+import { useState, useEffect, useRef } from "react";
 import {MEDIA_ENDPOINT, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, proxyUrl } from "./constants";
 import axios from "axios";
 import Skeleton from "react-loading-skeleton";
@@ -9,7 +9,7 @@ import { HashLoader } from "react-spinners";
 import { bytesToSize, convertSecondsToTime, formatDate, getMediaStreams, getStreamUrl, getUUID, secondsToHMS, setWidths, transformStreamObj } from "@/utils/general";
 import 'vidstack/styles/defaults.css';
 import 'vidstack/styles/community-skin/video.css';
-// import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster } from '@vidstack/react';
+import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster } from '@vidstack/react';
 
 interface MediaModalProps {
     show: boolean;
@@ -23,13 +23,21 @@ interface SeasonProps {
     onClick: () => void;
 }
 
+interface EpisodeProps {
+    episode: SeriesObj;
+    onClick: () => void;
+    episodeStreams: StreamObj[];
+    isLoadingStreams: boolean;
+    onEpisodeStreamClick: (stream: StreamObj) => void;
+}
+
 interface SeriesData {
     [mediaId: string]: SeriesObj[];
 }
 
 interface SeriesStreamObj {
     [seasonId: string]: {
-        [episodeId: string]: StreamObj
+        [episodeId: string]: StreamObj[]
     }
 }
 
@@ -41,7 +49,6 @@ function Season({ season, onClick }: SeasonProps) {
     // console.log(seasonDetails, season)
 
     return (
-        mediaType === "season" ? 
         <div className="w-[170px] h-[250px] relative rounded-xl cursor-pointer" onClick={onClick}>
             {
                 seasonDetails.art.poster ? <img className="absolute top-0 bottom-0 left-0 right-0 w-full h-full rounded-xl" src={seasonDetails?.art.poster} alt={seasonDetails?.plot} /> : ""
@@ -54,64 +61,108 @@ function Season({ season, onClick }: SeasonProps) {
             <div className="w-full bg-black bg-opacity-80 px-3 py-3 text-white absolute bottom-0 rounded-b-[11px]">
                 <h4>{mediaType === "season" ? season._source.info_labels.originaltitle || `Season ${season._source.info_labels.season}` : mediaType === "episode" ? seasonDetails.title : ""}</h4>
             </div>
-        </div> :
-        <article className="flex items-center space-x-6 px-6 py-4 border-2 border-transparent hover:border-yellow-300 rounded-xl duration-500 ease-in-out w-full">
-            <img src={seasonDetails?.art.poster} alt="" width="60" height="50" className="flex-none rounded-md bg-slate-100 w-16 h-20 object-cover" />
-            <div className="min-w-0 relative flex-auto">
-                <h2 className="font-semibold text-white text-opacity-80 truncate mr-28">{ seasonDetails.title || `Season ${season._source.info_labels.season}: Episode ${season._source.info_labels.episode}` }</h2>
-                <dl className="mt-2.5 flex flex-wrap text-sm leading-6 font-medium text-gray-300 text-opacity-90">
-                    <div className="absolute top-0 right-0 flex items-center space-x-1">
-                        <dt className="fill-yellow-300">
-                            <span className="sr-only">Star rating</span>
-                            <svg className="" width="16" height="20">
-                                <path d="M7.05 3.691c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.372 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118L.98 9.483c-.784-.57-.381-1.81.587-1.81H5.03a1 1 0 00.95-.69L7.05 3.69z" />
-                            </svg>
-                        </dt>
-                        <dd>{rating.toFixed(1)}</dd>
-                    </div>
-                    <div>
-                        <dt className="sr-only">Episode Number</dt>
-                        <dd className="px-1.5 ring-1 ring-slate-200 rounded">S{season._source.info_labels.season || 1} E{season._source.info_labels.episode?.toString().padStart(2, "0")}</dd>
-                    </div>
-                    <div className="ml-2">
-                        <dt className="sr-only">Aired</dt>
-                        <dd>{season._source.info_labels.aired}</dd>
-                    </div>
-                    {/* <div>
-                        <dt className="sr-only">Episode</dt>
-                        <dd className="flex items-center">
-                            <svg width="2" height="2" fill="currentColor" className="mx-2 text-slate-300" aria-hidden="true">
-                                <circle cx="1" cy="1" r="1" />
-                            </svg>
-                            Episode { season._source.info_labels.episode }
-                        </dd>
-                    </div> */}
-                    <div>
-                        <dt className="sr-only">Runtime</dt>
-                        <dd className="flex items-center">
-                            <svg width="2" height="2" fill="currentColor" className="mx-2 text-slate-300" aria-hidden="true">
-                                <circle cx="1" cy="1" r="1" />
-                            </svg>
-                            { convertSecondsToTime(season._source.info_labels.duration) }
-                        </dd>
-                    </div>
-                    {/* <div className="flex-none w-full mt-2 font-normal">
-                        <dt className="sr-only">Cast</dt>
-                        <dd className="text-gray-300">{ season._source.cast.map(actor => actor.name).join(", ") }</dd>
-                    </div> */}
-                </dl>
+        </div>
+    )
+}
+
+function Episode({ episode, onClick, episodeStreams, isLoadingStreams, onEpisodeStreamClick }: EpisodeProps) {
+    const episodeDetails = getDisplayDetails(episode._source.i18n_info_labels);
+    const hasNoStreams = Array.isArray(episodeStreams) && !episodeStreams?.length;
+    const [showStreams, setShowStreams] = useState(false);
+    let { rating, voteCount } = getRatingAggr(episode._source.ratings);
+    useEffect(() => {
+        console.log(episodeStreams)
+    }, [episodeStreams])
+
+    useEffect(() => {
+        console.log(showStreams)
+    }, [showStreams])
+
+    return (
+        <div className={`max-w-full relative px-6 py-4 border-2 border-transparent hover:border-yellow-300 hover:border-opacity-100 rounded-xl transition-all duration-500 ease-in-out ${episodeStreams?.length ? "border-yellow-300 border-opacity-60" : ""}`}>
+            <article className="flex items-center space-x-6 duration-500 ease-in-out w-full">
+                <img src={episodeDetails?.art.poster} alt="" width="60" height="50" className="flex-none rounded-md bg-slate-100 w-16 h-20 object-cover" />
+                <div className="min-w-0 relative flex-auto">
+                    <h2 className="font-semibold text-white text-opacity-80 truncate mr-28">{ episodeDetails.title || `Season ${episode._source.info_labels.season}: Episode ${episode._source.info_labels.episode}` }</h2>
+                    <dl className="mt-2.5 flex flex-wrap text-sm leading-6 font-medium text-gray-300 text-opacity-90">
+                        <div className="absolute top-0 right-0 flex items-center space-x-1">
+                            <dt className="fill-yellow-300">
+                                <span className="sr-only">Star rating</span>
+                                <svg className="" width="16" height="20">
+                                    <path d="M7.05 3.691c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.372 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118L.98 9.483c-.784-.57-.381-1.81.587-1.81H5.03a1 1 0 00.95-.69L7.05 3.69z" />
+                                </svg>
+                            </dt>
+                            <dd>{rating.toFixed(1)}</dd>
+                        </div>
+                        <div>
+                            <dt className="sr-only">Episode Number</dt>
+                            <dd className="px-1.5 ring-1 ring-slate-200 rounded">S{episode._source.info_labels.season || 1} E{episode._source.info_labels.episode?.toString().padStart(2, "0")}</dd>
+                        </div>
+                        <div className="ml-2">
+                            <dt className="sr-only">Aired</dt>
+                            <dd>{episode._source.info_labels.aired}</dd>
+                        </div>
+                        {/* <div>
+                            <dt className="sr-only">Episode</dt>
+                            <dd className="flex items-center">
+                                <svg width="2" height="2" fill="currentColor" className="mx-2 text-slate-300" aria-hidden="true">
+                                    <circle cx="1" cy="1" r="1" />
+                                </svg>
+                                Episode { season._source.info_labels.episode }
+                            </dd>
+                        </div> */}
+                        <div>
+                            <dt className="sr-only">Runtime</dt>
+                            <dd className="flex items-center">
+                                <svg width="2" height="2" fill="currentColor" className="mx-2 text-slate-300" aria-hidden="true">
+                                    <circle cx="1" cy="1" r="1" />
+                                </svg>
+                                { convertSecondsToTime(episode._source.info_labels.duration) }
+                            </dd>
+                        </div>
+                        {
+                            hasNoStreams ? (
+                                <div className="ml-auto">
+                                    <VideoSlash variant="Bold" className="text-yellow-300" />
+                                </div>
+                            ) : ""
+                        }
+                        {/* <div className="flex-none w-full mt-2 font-normal">
+                            <dt className="sr-only">Cast</dt>
+                            <dd className="text-gray-300">{ season._source.cast.map(actor => actor.name).join(", ") }</dd>
+                        </div> */}
+                    </dl>
+                </div>
+                <button className={`h-16 min-w-[48px] w-12 border-black-1 bg-yellow-300 text-black-1 rounded-md text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex justify-center items-center !ml-10 ${hasNoStreams ? "opacity-40 pointer-events-none" : ""}`} onClick={onClick}>
+                    <PlayCircle size={28} variant="Bold" />
+                </button>
+            </article>
+            <div className={`flex flex-col gap-5 opacity-0 invisible -translate-y-10 duration-500 ease-in-out ${episodeStreams?.length ? "mt-5 !opacity-100 !visible !translate-y-0" : ""}`}>
+                {
+                    episodeStreams?.length ? 
+                    episodeStreams.map((stream, index) => <MediaStreamOption key={index} stream={stream} isEpisode={true} onStreamClick={() => onEpisodeStreamClick(stream)} />)
+                    : ""
+                }
             </div>
-            <button className="h-full min-w-[48px] w-12 border-black-1 bg-yellow-300 text-black-1 rounded-md text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex justify-center items-center !ml-10" onClick={onClick}>
-                <PlayCircle size={28} variant="Bold" />
-            </button>
-        </article>
+            <div className={`h-0 duration-300 ease-linear ${hasNoStreams ? "h-6 remove-element" : ""}`}>
+                {
+                    hasNoStreams ? 
+                        <p className={`text-center text-gray-300 font-medium ${hasNoStreams ? "" : ""}`}>No streams available</p>
+                        : ""
+                }
+            </div>
+            {/* If you want a smoother height increase animation, you can comment out the loader below (and its wrapper div) */}
+            <div className={`absolute top-0 left-0 right-0 w-full h-full backdrop-blur-sm rounded-2xl flex items-center justify-center opacity-0 invisible duration-300 ease-in-out ${isLoadingStreams ? "!opacity-100 !visible" : ""}`}>
+                <HashLoader size={50} speedMultiplier={1.2} color="#fde047" loading={isLoadingStreams} />
+            </div>
+        </div>
     )
 }
 
 
-function MediaStreamOption({ stream, onStreamClick }: { stream: StreamObj, onStreamClick: () => void }) {
+function MediaStreamOption({ stream, isEpisode, onStreamClick }: { stream: StreamObj, isEpisode?: boolean, onStreamClick: () => void }) {
     return (
-        <div className="flex items-center justify-between gap-20">
+        <div className={`flex items-center justify-between ${isEpisode ? "gap-10" : "gap-20"}`}>
             <div className="flex gap-8 text-[15px] text-gray-300 text-opacity-50">
                 {
                     stream.video.length ?
@@ -124,14 +175,18 @@ function MediaStreamOption({ stream, onStreamClick }: { stream: StreamObj, onStr
                         </p>
                     </div> : ""
                 }
-                <div className="size flex flex-col gap-1.5 items-center">
-                    <Document size={22} variant="Bold" className="text-white text-opacity-70" />
-                    <p>
-                        {
-                            bytesToSize(stream.size)
-                        }
-                    </p>
-                </div>
+                {
+                    !isEpisode ? (
+                        <div className="size flex flex-col gap-1.5 items-center">
+                            <Document size={22} variant="Bold" className="text-white text-opacity-70" />
+                            <p>
+                                {
+                                    bytesToSize(stream.size)
+                                }
+                            </p>
+                        </div>
+                    ) : ""
+                }
                 {
                     stream.audio.length ?
                     <div className="audio flex flex-col gap-1.5 items-center">
@@ -166,7 +221,7 @@ function MediaStreamOption({ stream, onStreamClick }: { stream: StreamObj, onStr
                     </div> : ""
                 }
                 {
-                    stream.video.length && stream.audio.length ?
+                    stream.video.length && stream.audio.length && !isEpisode ?
                     <div className="codec flex flex-col gap-1.5 items-center">
                         <Barcode size={22} variant="Bold" className="text-white text-opacity-70" />
                         <p>
@@ -178,9 +233,17 @@ function MediaStreamOption({ stream, onStreamClick }: { stream: StreamObj, onStr
                 }
             </div>
 
-            <button className="h-16 w-12 bg-yellow-300 text-black-1 rounded-md text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex justify-center items-center gap-4" onClick={() => {onStreamClick();}}>
-                <PlayCircle size={28} variant="Bold" />
-            </button>
+            {
+                isEpisode ? 
+                    <button onClick={() => {onStreamClick();}}>
+                        <PlayCircle size={40} variant="Bold" className="text-yellow-300" />
+                    </button>
+                : (
+                    <button className="h-16 w-12 bg-yellow-300 text-black-1 rounded-md text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex justify-center items-center gap-4" onClick={() => {onStreamClick();}}>
+                        <PlayCircle size={28} variant="Bold" />
+                    </button>
+                )
+            }
         </div>
     )
 }
@@ -197,10 +260,16 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
     const [episodes, setEpisodes] = useState<SeriesData>({});
     const [selectedStream, setSelectedStream] = useState<StreamObj | undefined>();
     const [mediaUrl, setMediaUrl] = useState("");
+    const [isLoadingEpisodeStreams, setIsLoadingEpisodeStreams] = useState("");
     let { rating, voteCount } = getRatingAggr(movieDetails.ratings);
     const streamClasses = [".size", ".audio", ".subtitles", ".resolution", ".codec", ".duration"]
     const [isLoadingUrl, setIsLoadingUrl] = useState(false);
     const movieTitle = displayDetails?.title || movieDetails.info_labels?.originaltitle;
+    const storeKeyRef = useRef("");
+    
+    useEffect(() => {
+        storeKeyRef.current = media._id + "__" + selectedSeason?._id;
+    }, [media, selectedSeason])
 
     function onMediaCanLoad(event: any) {
         console.log(event)
@@ -280,24 +349,33 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
         let seasonEpisodes = episodes[season._id];
         if (!seasonEpisodes) {
             seasonEpisodes = await getEpisodes(season);
+            console.log(seasonEpisodes)
         }
-        setEpisodes({ ...episodes, [season._id]: seasonEpisodes });
+        setEpisodes((prevEpisodes) => { 
+            return { ...prevEpisodes, [season._id]: seasonEpisodes }
+        });
     }
 
     async function getEpisodeStreams(episode: SeriesObj) {
-        const episodeStreams = await getMediaStreams(episode);
+        let epiStreams = episodeStreams[storeKeyRef.current]?.[episode?._id]
+        console.log(epiStreams)
+        if (!epiStreams) {
+            setIsLoadingEpisodeStreams(episode._id);
+            epiStreams = await getMediaStreams(episode);
+        }
         // const streamObjKey = selectedSeason?._id + "__" + episode._id
         if (selectedSeason) {
             setEpisodeStreams((prevStreams) => {
                 return {
                     ...prevStreams,
-                    [selectedSeason._id]: {
-                        ...prevStreams[selectedSeason._id],
-                        ...episodeStreams
+                    [storeKeyRef.current]: {
+                        ...prevStreams[storeKeyRef.current],
+                        [episode._id]: epiStreams
                     }
                 }
             });
         }
+        setIsLoadingEpisodeStreams("");
         console.log(episodeStreams)
     }
 
@@ -322,12 +400,12 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                 <div className="min-w-[500px] w-[500px] h-full relative bg-[#191919] rounded-[30px] bg-opacity-75">
                     {
                         displayDetails?.art?.poster ?
-                        <img src={displayDetails.art.poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
+                        <img key={media._id} src={displayDetails.art.poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
                         : <ImageIcon size={170} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
                     }
                 </div>
 
-                <div className="modal-content py-10 text-gray-300 overflow-y-scroll hide-scrollbar relative"> {/* max-w-[620px] */}
+                <div className="modal-content min-w-[550px] py-10 text-gray-300 overflow-y-scroll hide-scrollbar relative duration-300 ease-in-out"> {/* max-w-[620px] */}
                     <div className="max-w-[620px]">
                         <h2 className="font-semibold text-white opacity-90 text-4xl mb-6">{ movieTitle }</h2>
                         <p className="max-w-[600px] leading-loose mb-8">
@@ -400,11 +478,11 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
                     {
                         movieDetails.info_labels.mediatype === "tvshow" ? "" : (
-                            <div className={`mt-12 mb-16 ${streams.length ? "" : "w-[600px]"}`}>
+                            <div className={`mt-12 mb-6 ${streams?.length ? "" : "w-[600px]"}`}>
                                 <p className="text-base opacity-60 text-center mb-5">Available Streams</p>
                                 <div className="flex flex-col gap-10">
                                     {
-                                        streams.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onStreamClick={() => handleStreamPlay(stream)} />)
+                                        streams?.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onStreamClick={() => handleStreamPlay(stream)} />)
                                         : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
                                     }
                                 </div>
@@ -418,6 +496,10 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                             Add to Favorites
                         </button>
 
+                        <button className={`bg-yellow-300 text-black-1 w-14 h-14 rounded-xl flex items-center justify-center opacity-0 invisible ${showEpisodes && selectedSeason ? "!opacity-100 !visible" : ""}`} onClick={() => {setShowEpisodes(false);setSelectedSeason(undefined);}}>
+                            <Backward size={28} variant="Bulk" />
+                        </button>
+
                         {/* <button className="px-10 py-3 bg-yellow-300 text-black-1 rounded-xl text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4">
                             <PlayCircle size={32} variant="Bold" />
                             Watch
@@ -426,27 +508,27 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
                     {
                         movieDetails.info_labels.mediatype === "tvshow" ? (
-                            <div className={`mt-12 mb-16 ${seasons[media._id]?.length ? "" : "w-[600px]"}`}>
-                                <p className="text-base opacity-60 text-center mb-5">Available Seasons</p>
+                            <div className={`mt-12 mb-6- ${seasons[media._id]?.length ? "" : "w-[600px]"}`}>
+                                <p className="text-base opacity-60 text-center mb-5">Available {showEpisodes ? "Episodes" : "Seasons"}</p>
                                 <div className="relative w-full min-h-[250px]">
-                                    <div className={`w-full absolute top-0 flex flex-wrap gap-8 duration-300 ease-in-out ${selectedSeason && episodes[selectedSeason?._id]?.length ? "opacity-0 invisible -translate-y-16" : ""}`}>
+                                    <div className={`max-w-full w-full absolute top-0 flex flex-wrap gap-8 duration-300 ease-in-out ${selectedSeason && seasons[media?._id]?.length ? "opacity-0 invisible -translate-y-16" : ""}`}>
                                         {
-                                            seasons[media._id]?.length ? seasons[media._id].map((season, index) => <Season key={index} season={season} onClick={() => onSeasonClick(season)} />)
+                                            seasons[media._id]?.length ? seasons[media._id].map((seriesMedia, index) =>
+                                                seriesMedia._source.info_labels.mediatype === "season" ?
+                                                <Season key={index} season={seriesMedia} onClick={() => onSeasonClick(seriesMedia)} />
+                                                : <Episode key={index} episode={seriesMedia} onClick={() => getEpisodeStreams(seriesMedia)} episodeStreams={episodeStreams[storeKeyRef.current]?.[seriesMedia._id]} onEpisodeStreamClick={(stream) => handleStreamPlay(stream)} isLoadingStreams={isLoadingEpisodeStreams === seriesMedia._id} />
+                                            )
                                             : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
                                         }
                                     </div>
-                                    <div className={`absolute top-0 flex gap-10 opacity-0 invisible translate-y-16 duration-500 ease-in-out ${showEpisodes && selectedSeason && episodes[selectedSeason?._id]?.length ? "!opacity-100 !visible !translate-y-0" : ""}`}>
-                                        {/* <button className="bg-yellow-300 text-black-1 w-10 h-full flex items-center justify-center">
-                                            <Backward />
-                                        </button> */}
-                                        <div className="flex flex-col gap-3 flex-wrap">
+                                    <div className={`max-w-full absolute top-0 flex flex-col gap-10 opacity-0 invisible translate-y-16 duration-500 ease-in-out ${showEpisodes && selectedSeason && episodes[selectedSeason?._id]?.length ? "!opacity-100 !visible !translate-y-0" : ""}`}>
+                                        <div className="flex flex-col gap-4 flex-wrap max-w-full">
                                             {
-                                                showEpisodes && selectedSeason && episodes[selectedSeason?._id]?.length ? episodes[selectedSeason._id].map((episode, index) => <Season key={index} season={episode} onClick={() => getEpisodeStreams(episode)} />)
-                                                : ""
+                                                episodes[selectedSeason?._id || ""]?.map((episode, index) => <Episode key={index} episode={episode} onClick={() => getEpisodeStreams(episode)} episodeStreams={episodeStreams[storeKeyRef.current]?.[episode?._id] || undefined} onEpisodeStreamClick={(stream) => handleStreamPlay(stream)} isLoadingStreams={isLoadingEpisodeStreams === episode?._id} />)
                                             }
                                         </div>
                                     </div>
-                                    <div className={`absolute w-full h-full top-0 bottom-0 rounded-xl backdrop-blur-sm flex items-center justify-center duration-300 ease-linear opacity-0 invisible ${showEpisodes && !episodes[selectedSeason?._id || ""] ? "!opacity-100 !visible" : ""}`}>
+                                    <div className={`absolute w-full h-full top-0 bottom-0 rounded-xl backdrop-blur-sm flex items-center justify-center duration-300 ease-linear opacity-0 invisible ${showEpisodes && !episodes[selectedSeason?._id || ""]?.length ? "!opacity-100 !visible" : ""}`}>
                                         <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={showEpisodes} />
                                     </div>
                                 </div>
@@ -455,11 +537,14 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                     }
                 </div>
 
+                <div className={`absolute w-full h-full top-0 bottom-0 rounded-xl backdrop-blur-sm flex items-center justify-center duration-300 ease-linear opacity-0 invisible ${isLoadingUrl ? "!opacity-100 !visible" : ""}`}>
+                    <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={isLoadingUrl} />
+                </div>
 
                 <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
-                    {/* <MediaPlayer
+                    <MediaPlayer
                         title={displayDetails?.title || movieDetails.info_labels?.originaltitle}
-                        src={mediaUrl.length ? transformMediaUrl(mediaUrl) : ""}
+                        src={mediaUrl.length ? "http://localhost:5000/video/"+mediaUrl : ""}
                         // src={[{
                         //         src: mediaUrl.length ? transformMediaUrl(mediaUrl) : "",
                         //         type: "video/mp4; codecs=avc1.42E01E, mp4a.40.2"
@@ -477,27 +562,20 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                             <MediaPoster
                                 alt={displayDetails?.plot}
                             />
-                            <track
-                                src="https://media-files.vidstack.io/sprite-fight/subs/english.vtt"
-                                label="English"
-                                srcLang="en-US"
-                                kind="subtitles"
-                                default
-                            />
                         </MediaOutlet>
                         <MediaCommunitySkin />
-                    </MediaPlayer> */}
+                    </MediaPlayer>
 
-                    <video
+                    {/* <video
                         id="my-video"
                         className="h-[calc(100%-10px)]"
                         controls
                         preload="auto"
                         width="100%"
                         data-setup="{}"
-                        src={transformMediaUrl(mediaUrl)}
+                        src={mediaUrl}
                     >
-                    </video>
+                    </video> */}
                         {/* <p className="vjs-no-js">
                         To view this video please enable JavaScript, and consider upgrading to a
                         web browser that

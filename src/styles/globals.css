@@ -27,6 +27,7 @@ a, button, input {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .hide-scrollbar {
+  scroll-behavior: smooth;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
@@ -39,4 +40,18 @@ a, button, input {
 .effect-1,
 .effect-2 {
   overflow: hidden;
+}
+
+@keyframes destroyElement {
+  to {
+    visibility: hidden;
+    opacity: 0;
+    height: 0;
+  }
+}
+
+.remove-element {
+  overflow: hidden;
+  animation: destroyElement 0.5s ease-in-out 3s !important;
+  animation-fill-mode: forwards !important;
 }

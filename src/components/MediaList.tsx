@@ -17,7 +17,7 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
 
     return (
         <>
-            <div className={`flex justify-center flex-wrap gap-4 ${openModal ? "hidden" : ""}`}>
+            <div className={`flex justify-center flex-wrap gap-4 ${openModal ? "!overflow-hidden" : ""}`}>
                 {
                     media.length ? media.map((show: MediaObj, index: number) => (
                         <MediaCard key={index} media={show?._source} showMediaInfo={() => isAuthenticated ? displayMediaInfo(show) : onMovieSelect(true)} />

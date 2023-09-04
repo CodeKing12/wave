@@ -182,6 +182,6 @@ export async function getMediaStreams(media: MediaObj | SeriesObj) {
         return response.data;
     } catch(error) {
         console.log(error)
-        return [];
+        return undefined;
     }
 }

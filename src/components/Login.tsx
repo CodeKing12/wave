@@ -38,7 +38,17 @@ export default function Login({ show, onLogin, onClose }: LoginProps) {
                 .then(
                     function (response) {
                         token = parseXml(response.data, "token");
-                        localStorage.setItem("authToken", token);
+                        
+                        const expirationDate = new Date();
+                        // Set the token to expire after 3 days
+                        expirationDate.setDate(expirationDate.getDate() + 3);
+                        
+                        const tokenData = {
+                            token,
+                            expiration: expirationDate.getTime()
+                            // expiration: new Date().getTime() + 3 * 60 * 1000 // This sets it to expire after 3 mins (for testing purposes)
+                        }
+                        localStorage.setItem("authToken", JSON.stringify(tokenData));
                         onLogin(true, token);
                     }
                 )

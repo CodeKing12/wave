@@ -55,12 +55,12 @@ encryptData(originalData, encryptionKey)
     const storedEncryptedData = new Uint8Array(JSON.parse(localStorage.getItem('encryptedData')));
     decryptData(storedEncryptedData, storedIv, encryptionKey)
       .then(decryptedData => {
-        console.log('Decrypted data:', decryptedData);
+        // console.log('Decrypted data:', decryptedData);
       })
       .catch(error => {
-        console.error('Decryption error:', error);
+        // console.error('Decryption error:', error);
       });
   })
   .catch(error => {
-    console.error('Encryption error:', error);
+    // console.error('Encryption error:', error);
   });
