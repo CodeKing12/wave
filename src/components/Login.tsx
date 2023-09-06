@@ -5,7 +5,7 @@ import { AUTH_ENDPOINT, PATH_LOGIN, PATH_SALT, authAxiosConfig } from "./constan
 import { sha1 } from "@/utils/Sha";
 import { md5crypt } from "@/utils/MD5";
 import { parseXml } from "@/pages";
-import { RingLoader } from "react-spinners";
+import { PacmanLoader } from "react-spinners";
 
 interface LoginProps {
     show: boolean;
@@ -69,7 +69,7 @@ export default function Login({ show, onLogin, onClose }: LoginProps) {
                     </button>
                 </div>
                 <div className="relative">
-                    <div className={`opacity-100 visible duration-300 ease-in-out ${isAuthenticating ? "!invisible !opacity-0 !-translate-y-10" : ""}`}>
+                    <div className={`duration-300 ease-in-out ${show ? "opacity-100 visible" : ""} ${isAuthenticating ? "!invisible !opacity-0 !-translate-y-10" : ""}`}>
                         <h3 className="text-3xl font-semibold mb-2 text-gray-50">Log in to Webshare</h3>
                         <p className="text-gray-400 text-sm mb-10">Enter your Webshare username and password</p>
                         <form className="flex flex-col gap-4 w-full mb-4">
@@ -88,7 +88,7 @@ export default function Login({ show, onLogin, onClose }: LoginProps) {
                         </form>
                     </div>
                     <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-10 invisible opacity-0 duration-300 ease-in-out ${isAuthenticating ? "!visible !opacity-100 -!translate-y-0 !-translate-y-1/2" : ""}`}>
-                        <RingLoader color="#fde047" />
+                        <PacmanLoader size={30} color="#fde047" />
                     </div>
                 </div>
             </div>

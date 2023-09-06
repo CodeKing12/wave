@@ -550,7 +550,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                         //         type: "video/mp4; codecs=avc1.42E01E, mp4a.40.2"
                         //     }
                         // ]}
-                        poster={displayDetails.art.poster}
+                        poster={displayDetails.art.poster || ""}
                         // thumbnails="https://media-files.vidstack.io/sprite-fight/thumbnails.vtt"
                         aspectRatio={selectedStream?.video[0].aspect || 16 / 9}
                         crossorigin="anonymous"

@@ -12,6 +12,7 @@ import { MediaObj } from '@/components/MediaTypes';
 import Login from '@/components/Login';
 import useAuthToken from '@/hooks/useAuthToken';
 import { getUUID, uuidv4 } from '@/utils/general';
+import { Alert, AlertData, AlertInfo } from "@/components/Alert";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -67,6 +68,11 @@ function Navbar({ query, updateQuery, onSearch }: NavProps) {
 }
 
 export default function Home() {
+  const defaultAlert: AlertData = {
+    type: "success",
+    title: "",
+  }
+
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
@@ -79,6 +85,15 @@ export default function Home() {
   const prevPagination = useRef(pagination);
   const [query, setQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<String[]>([]);
+  const [alerts, setAlerts] = useState<AlertInfo[]>([]);
+
+  const addAlert = (alert: AlertData) => {
+    setAlerts((prevAlerts) => [...prevAlerts, {...alert, id: prevAlerts.length}]);
+  };
+
+  const removeAlert = (id: number) => {
+    setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert.id !== id));
+  };
 
   useEffect(() => {
     let storedAuth = localStorage.getItem('authToken');
@@ -169,11 +184,25 @@ export default function Home() {
     setAuthToken("");
     setIsAuthenticated(false);
     localStorage.removeItem("authToken");
+    addAlert({
+      type: "success",
+      title: "Logout Successful"
+    })
+  }
+
+  function onLogin(isSuccess: boolean, token: string) {
+    setIsAuthenticated(isSuccess);
+    setAuthToken(token);
+    setOpenLogin(false);
+    addAlert({
+      type: "success",
+      title: "Authentication Successful"
+    })
   }
 
   return (
     <main className="bg-[#191919]">
-      <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} onHide={setHideSidebar} onLogout={logOutWebshare} />
+      <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} />
 
       <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins duration-300 ease-in-out ${hideSidebar ? "!ml-0" : ""}`} id="main-display">
         <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} />
@@ -204,7 +233,20 @@ export default function Home() {
         </div>
       </section>
 
-      <Login show={openLogin && !isAuthenticated} onLogin={(isSuccess, token) => {setIsAuthenticated(isSuccess);setAuthToken(token)}} onClose={() => setOpenLogin(false)} />
+      <Login show={openLogin && !isAuthenticated} onLogin={onLogin} onClose={() => setOpenLogin(false)} />
+      
+      <div className="flex flex-col gap-2.5 fixed top-0 pt-3 left-1/2 -translate-x-1/2 h-fit duration-500 ease-in-out">
+        {alerts.map((alert) => (
+          <Alert
+            key={alert.id}
+            id={alert.id}
+            title={alert.title}
+            message={alert.message}
+            type={alert.type}
+            onRemove={removeAlert}
+          />
+        ))}
+      </div>
     </main>
   )
 }

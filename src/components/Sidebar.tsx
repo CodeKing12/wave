@@ -16,6 +16,7 @@ interface SidebarItemProps {
 interface SidebarProps {
     current: PageType,
     isHidden: boolean,
+    isLoggedIn: boolean;
     onHide: (isHidden: boolean) => void,
     onChange: (newVal: PageType) => void,
     onLogout: () => void,
@@ -33,7 +34,7 @@ function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
     )
 }
 
-export default function Sidebar({ current, isHidden, onHide, onChange, onLogout }: SidebarProps) {
+export default function Sidebar({ current, isHidden, isLoggedIn, onHide, onChange, onLogout }: SidebarProps) {
     return (
         <aside className={`w-[300px] bg-black-1 h-full min-h-screen fixed top-0 bottom-0 left-0 pt-20 pb-6 duration-500 ease-in-out ${isHidden ? "-translate-x-full" : ""}`}>
             <button className={`bg-yellow-300 w-10 h-10 flex justify-center items-center absolute top-0 right-0 opacity-60 hover:opacity-100 ${isHidden ? "!-right-10" : ""}`} onClick={() => onHide(!isHidden)}>
@@ -56,10 +57,14 @@ export default function Sidebar({ current, isHidden, onHide, onChange, onLogout 
                     <NavItem icon={<Slider size={30} variant="Linear" />} text="Series CZ/SK" page="series_czsk" current={current} onItemClick={onChange} />
                 </div>
             </div>
-            <button className="mt-auto text-opacity-70 text-white font-medium flex items-center gap-3 py-2 px-8 text-[17px] hover:text-yellow-300 group duration-500 ease-in-out absolute bottom-[18px]" onClick={onLogout}>
-                Logout
-                <Logout className="text-yellow-300 group-hover:text-white duration-500 ease-in-out" />
-            </button>
+            {
+                isLoggedIn ? (
+                    <button className="mt-auto text-opacity-70 text-white font-medium flex items-center gap-3 py-2 px-8 text-[17px] hover:text-yellow-300 group duration-500 ease-in-out absolute bottom-[18px]" onClick={onLogout}>
+                        Logout
+                        <Logout className="text-yellow-300 group-hover:text-white duration-500 ease-in-out" />
+                    </button>
+                ) : ""
+            }
         </aside>
     )
 }
