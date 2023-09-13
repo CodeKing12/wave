@@ -1,27 +1,23 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
 import Sidebar, { PageType } from '@/components/Sidebar'
 import { SearchNormal1, ArrowLeft, ArrowRight, SearchNormal } from "iconsax-react"
 import axios from 'axios';
 import { MEDIA_ENDPOINT, PATH_ANIMATED_MOVIES, PATH_ANIMATED_SERIES, PATH_CONCERTS, PATH_FAIRY_TALES, PATH_MOVIES, PATH_MOVIES_CZSK, PATH_SEARCH_MEDIA, PATH_SERIES, PATH_SERIES_CZSK, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE } from '@/components/constants';
-import { useEffect, useState, useRef } from 'react';
-import MovieList from '@/components/MediaList';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import MediaList from '@/components/MediaList';
 // import { BeatLoader, BounceLoader, ClipLoader, ClockLoader, ClimbingBoxLoader, FadeLoader, GridLoader, PuffLoader, PulseLoader, PropagateLoader, RingLoader, SquareLoader, SkewLoader, ScaleLoader, HashLoader, SyncLoader, RotateLoader } from 'react-spinners';
 import { HashLoader } from 'react-spinners';
 import { MediaObj } from '@/components/MediaTypes';
 import Login from '@/components/Login';
-import useAuthToken from '@/hooks/useAuthToken';
-import { getUUID, uuidv4 } from '@/utils/general';
 import { Alert, AlertData, AlertInfo } from "@/components/Alert";
-
-const inter = Inter({ subsets: ['latin'] })
+import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
+import FocusLeaf from '@/components/FocusLeaf';
 
 
 export function parseXml(data: string, param: string) {
   const xml = new DOMParser().parseFromString(data, "application/xml");
   const processed = xml.getElementsByTagName("response")[0];
 
-  return processed.getElementsByTagName(param)[0].textContent || "";
+  return processed.getElementsByTagName(param)[0]?.textContent || "";
 }
 
 
@@ -41,6 +37,7 @@ interface NavProps {
   query: string;
   updateQuery: (value: string) => void;
   onSearch: () => void;
+  showFavorites: () => void;
 }
 
 interface TokenObj {
@@ -48,22 +45,32 @@ interface TokenObj {
   expiration: number
 }
 
-function Navbar({ query, updateQuery, onSearch }: NavProps) {
-  return (
-    <nav className="flex items-center justify-between">
-      <div className="flex gap-12 items-center text-white text-opacity-80 font-medium">
-        <a className="cursor-pointer">Favorites</a>
-        <a className="cursor-pointer">Watched</a>
-      </div>
+function Navbar({ query, updateQuery, onSearch, showFavorites }: NavProps) {
+  const { ref, focusKey, focused, hasFocusedChild } = useFocusable()
 
-      <form className="relative group">
-        <input className="w-[350px] h-14 px-14 py-3 text-white text-sm bg-gray-700 bg-opacity-10 rounded-xl border border-[rgba(249,249,249,0.10)] placeholder:text-gray-300 placeholder:text-sm outline-none" placeholder="Search Movies or TV Shows" onChange={(e) => updateQuery(e.target.value)} />
-        <SearchNormal1 size={24} color="#AEAFB2" className="absolute top-1/2 -translate-y-1/2 left-4" />
-        <button className={`w-8 h-8 bg-yellow-300 rounded-lg absolute top-1/2 -translate-y-1/2 right-4 flex items-center justify-center opacity-0 invisible -group-hover:visible -group-hover:opacity-100 ease-in-out ${query ? "!visible !opacity-100" : ""}`} onClick={(e) => {e.preventDefault();onSearch()}}>
-          <SearchNormal variant="Bold" size={16} />
-        </button>
-      </form>
-    </nav>
+  return (
+    <FocusContext.Provider value={focusKey}>
+      <nav className={`flex items-center justify-between ${focused ? "!duration-300 border-4 border-yellow-300" : ""}`} ref={ref}>
+        <div className="flex gap-12 items-center text-white text-opacity-80 font-medium">
+          <FocusLeaf focusedStyles="after:block animateUnderline">
+            <a className="cursor-pointer" onClick={showFavorites}>Favorites</a>
+          </FocusLeaf>
+          <FocusLeaf focusedStyles="after:block animateUnderline">
+            <a className="cursor-pointer">Watched</a>
+          </FocusLeaf>
+        </div>
+
+        <FocusLeaf isForm className="text-[#AEAFB2]" focusedStyles="searchFocus" onEnterPress={onSearch}>
+          <form className="relative group">
+              <input className="w-[350px] h-14 px-14 py-3 text-white text-sm bg-gray-700 bg-opacity-10 rounded-xl border border-[rgba(249,249,249,0.10)] placeholder:text-gray-300 placeholder:text-sm outline-none" placeholder="Search Movies or TV Shows" onChange={(e) => updateQuery(e.target.value)} />
+              <SearchNormal1 size={24} className="absolute top-1/2 -translate-y-1/2 left-4 icon ease-in-out duration-300" />
+              <button className={`w-8 h-8 bg-yellow-300 rounded-lg absolute top-1/2 -translate-y-1/2 right-4 flex items-center justify-center opacity-0 invisible -group-hover:visible -group-hover:opacity-100 ease-in-out ${query ? "!visible !opacity-100" : ""}`} onClick={(e) => {e.preventDefault();onSearch()}}>
+                <SearchNormal variant="Bold" color="#21201E" size={16} />
+              </button>
+          </form>
+        </FocusLeaf>
+      </nav>
+    </FocusContext.Provider>
   )
 }
 
@@ -86,6 +93,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<String[]>([]);
   const [alerts, setAlerts] = useState<AlertInfo[]>([]);
+  const { ref, focusKey, hasFocusedChild } = useFocusable({trackChildren: true})
 
   const addAlert = (alert: AlertData) => {
     setAlerts((prevAlerts) => [...prevAlerts, {...alert, id: prevAlerts.length}]);
@@ -139,7 +147,7 @@ export default function Home() {
     if (!media.hasOwnProperty(page) || pagination[page] > prevPagination.current[page] || isSearch) {
       if ((pagination[page] >= (media[page]?.length ?? 0) || isSearch)) {
         setLoading(true);
-        if (page === "search") {
+        if (page === "search" && pagination[page] <= 0) {
           media[page] = []
         }
         axios.get(MEDIA_ENDPOINT + api_map[page], {
@@ -154,12 +162,13 @@ export default function Home() {
               ...prevTotals,
               [page]: response.data.hits.total.value
             }))
+            // const currentPage = page === "search" && pagination[page] <= 0 ? [] : media[page] || [];
             const currentPage = media[page] || [];
             setMedia((prevMedia) => ({
               ...prevMedia,
-              [page]: page === "search" ? [response.data.hits.hits] : [...currentPage, response.data.hits.hits]
+              [page]: [...currentPage, response.data.hits.hits]
             }))
-            console.log([response.data.hits.hits])
+            // console.log([response.data.hits.hits])
             setLoading(false);
           }
         )
@@ -171,7 +180,9 @@ export default function Home() {
   function searchMedia() {
     console.log(query, searchHistory[searchHistory.length - 1])
     if (query.length && query !== searchHistory[searchHistory.length - 1]) {
-      setSearchHistory([...searchHistory, query])
+      setSearchHistory([...searchHistory, query]);
+      updatePagination("search");
+
       if (page !== "search") {
         setPage("search");
       }
@@ -200,38 +211,57 @@ export default function Home() {
     })
   }
 
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  const onCardFocus = useCallback(
+      ({ y }: { y: number }) => {
+          if (mainRef.current) {
+            mainRef.current.scrollTo({
+                top: y,
+                behavior: 'smooth'
+            });
+          }
+      }, [mainRef]
+  );
+
   return (
     <main className="bg-[#191919]">
       <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} />
 
-      <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins duration-300 ease-in-out ${hideSidebar ? "!ml-0" : ""}`} id="main-display">
-        <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} />
-        
-        <div className="relative flex-1 mt-6">
-          {
-            media[page] && media[page]?.[pagination[page]]?.length ? 
-            <MovieList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => setOpenLogin(true)} page={page} media={media[page]?.[pagination[page]]} />
-            : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
-          }
-        </div>
-        <div className={`flex items-center justify-between mt-10 ${loading ? "opacity-40 pointer-events-none" : "opacity-100 pointer-events-auto"}`}>
-          <button className="px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4" onClick={() => updatePagination(page, -1)}>
-              <ArrowLeft size={32} variant='Bold' />
-              Previous
-          </button>
+      <FocusContext.Provider value={focusKey}>
+        <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
+          <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} showFavorites={() => console.log(media[page])} />
+          
+          <div className={`relative flex-1 mt-6 ${hasFocusedChild ? 'menu-expanded' : 'menu-collapsed'}`} ref={ref}>
+            {
+              media[page] && media[page]?.[pagination[page]]?.length ? 
+              <MediaList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => setOpenLogin(true)} page={page} media={media[page]?.[pagination[page]]} onCardFocus={onCardFocus} />
+              : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            }
+          </div>
+          <div className={`flex items-center justify-between mt-10 ${loading ? "opacity-40 pointer-events-none" : "opacity-100 pointer-events-auto"}`}>
+            <div className={pagination[page] + 1 === 1 ? "cursor-not-allowed" : ""}>
+              <button className={`px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4 ${pagination[page] + 1 === 1 ? "opacity-40 pointer-events-none" : ""}`} onClick={() => updatePagination(page, -1)}>
+                  <ArrowLeft size={32} variant='Bold' />
+                  Previous
+              </button>
+            </div>
 
-          {
-            pagination[page] ?
-            <p className="text-lg font-semibold text-gray-300">Page: <span className="text-yellow-300 ml-2">{ pagination[page] + 1 }</span> / { Math.ceil(totals[page] / mediaPerPage) }</p>
-            : ""
-          }
+            {
+              typeof pagination[page] == "number" && pagination[page] >= 0 ?
+              <p className="text-lg font-semibold text-gray-300">Page: <span className="text-yellow-300 ml-2">{ pagination[page] + 1 }</span> / { Math.ceil(totals[page] / mediaPerPage) }</p>
+              : ""
+            }
 
-          <button className="px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4" onClick={() => updatePagination(page, +1)}>
-              Next
-              <ArrowRight size={32} variant='Bold' />
-          </button>
-        </div>
-      </section>
+            <div className={pagination[page] + 1 === Math.ceil(totals[page] / mediaPerPage) ? "cursor-not-allowed" : ""}>
+              <button className={`px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4 ${pagination[page] + 1 === Math.ceil(totals[page] / mediaPerPage) ? "opacity-40 pointer-events-none" : ""}`} onClick={() => updatePagination(page, +1)}>
+                  Next
+                  <ArrowRight size={32} variant='Bold' />
+              </button>
+            </div>
+          </div>
+        </section>
+      </FocusContext.Provider>
 
       <Login show={openLogin && !isAuthenticated} onLogin={onLogin} onClose={() => setOpenLogin(false)} />
       

@@ -26,7 +26,7 @@ export function getUUID() {
 }
 
 export function normalizeLanguage(source?: string):string {
-    return source && source.toUpperCase() || "?";
+    return source && source?.toUpperCase() || "?";
 }
 
 export function setWidths(selector: string) {
@@ -119,7 +119,7 @@ export async function getFilePasswordSalt(ident: string): Promise<string> {
         const response = await axios.post(AUTH_ENDPOINT + PATH_FILE_PASSWORD_SALT, { ident }, authAxiosConfig);
         return parseXml(response.data, "salt");
     } catch (error) {
-        console.log("An error occured while getting the salt: ", error);
+        console.log("An error occured while seasoning: ", error);
         return ""; // Return an empty string or handle the error appropriately
     }
 }
@@ -184,4 +184,21 @@ export async function getMediaStreams(media: MediaObj | SeriesObj) {
         console.log(error)
         return undefined;
     }
+}
+
+export function generateUniqueId(prefix = '') {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 5); // Adjust the length as needed
+
+    return `${prefix}${timestamp}${random}`;
+}
+
+export function formatStringAsId(input: string) {
+    // Replace non-alphanumeric characters with underscores
+    const formattedString = input.replace(/[^a-zA-Z0-9]+/g, '-');
+    
+    // Remove underscores from the beginning and end
+    const trimmedString = formattedString.replace(/^_+|_+$/g, '');
+  
+    return trimmedString;
 }

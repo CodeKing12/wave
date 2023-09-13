@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // distDir: "build",
+  distDir: "build",
+  output: "export",
+  assetPrefix: "./",
   // basePath: "/_next",
   reactStrictMode: true,
   images: {

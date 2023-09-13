@@ -55,3 +55,36 @@ a, button, input {
   animation: destroyElement 0.5s ease-in-out 3s !important;
   animation-fill-mode: forwards !important;
 }
+
+@keyframes underlineElement {
+  to {
+    width: 100%;
+  }
+}
+
+.animateUnderline {
+  position: relative;
+}
+
+.animateUnderline::after {
+  position: absolute;
+  width: 0;
+  height: 3px;
+  border-radius: 50px;
+  background-color: #fde047;
+  animation: underlineElement 0.3s ease-in-out !important;
+  animation-fill-mode: forwards !important;
+}
+
+.searchFocus input {
+  border-color: rgba(209, 213, 219, 0.5);
+}
+
+.searchFocus input::placeholder {
+  color: rgba(209, 213, 219, 0.8);
+  transition: all 0.3s ease-in-out;
+}
+
+.searchFocus .icon {
+  color: #fde047;
+}

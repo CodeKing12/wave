@@ -15,7 +15,8 @@ export const PATH_MOVIES_ADDED = "/api/media/filter/v2/all?type=movie&sort=dateA
 export const PATH_SERIES_ADDED = "/api/media/filter/v2/all?type=tvshow&sort=dateAdded&order=desc";
 
 export const TOKEN_PARAM_NAME = "access_token"
-export const TOKEN_PARAM_VALUE = "th2tdy0no8v1zoh1fs59";
+// export const TOKEN_PARAM_VALUE = "th2tdy0no8v1zoh1fs59";  // This is the former token, gotten from the ymovie app.
+export const TOKEN_PARAM_VALUE = "F4fdEDXKgsw7z3TxzSjaDpp3O";
 
 
 

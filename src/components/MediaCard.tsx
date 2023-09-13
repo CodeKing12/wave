@@ -1,5 +1,6 @@
 import { Heart, Star1, Image as ImageIcon } from "iconsax-react";
-import { I18nInfoLabel, RatingObj } from "./MediaTypes"
+import { I18nInfoLabel, RatingObj } from "./MediaTypes";
+import { useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 
 
 export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
@@ -48,11 +49,15 @@ export function getRatingAggr(ratings: RatingObj) {
     return { rating: aggrRating, voteCount };
 }
 
-export default function MediaCard({ media, showMediaInfo }: any) {
+export default function MediaCard({ media, showMediaInfo, onEnterPress, onFocus }: any) {
     let genres: string;
     let { rating, voteCount } = getRatingAggr(media?.ratings);
     const premiere_date = new Date(media.info_labels?.premiered);
     const displayDetails = getDisplayDetails(media.i18n_info_labels);
+    const { ref, focused } = useFocusable({
+        onEnterPress,
+        onFocus
+    });
 
     // if (!displayDetails) {
     //     if (media && media.i18n_info_labels) {
@@ -67,7 +72,7 @@ export default function MediaCard({ media, showMediaInfo }: any) {
     }
 
     return (
-      <div className="w-[240px] h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative">
+      <div className={`w-[240px] h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
         {
             /* eslint-disable @next/next/no-img-element */
             displayDetails?.art?.poster ?
@@ -75,7 +80,7 @@ export default function MediaCard({ media, showMediaInfo }: any) {
             : <ImageIcon size={85} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
             /* eslint-enable @next/next/no-img-element */
         }
-        <div className="w-full h-full absolute bottom-0 py-5 px-3 text-gray-100 bg-black bg-opacity-80 rounded-[11px] opacity-0 group-hover:opacity-100 invisible group-hover:visible ease-in-out duration-[400ms]" onClick={() => showMediaInfo(true)}>
+        <div className={`w-full h-full absolute bottom-0 py-5 px-3 text-gray-100 bg-black bg-opacity-80 rounded-[11px] opacity-0 group-hover:opacity-100 invisible group-hover:visible ease-in-out duration-[400ms] ${focused ? "!duration-300 !visible !opacity-100" : ""}`} onClick={() => showMediaInfo(true)}>
             <div className="flex flex-col justify-between h-full">
                 <div>
                     <h5 className="text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ displayDetails?.title || media.info_labels?.originaltitle }</h5>

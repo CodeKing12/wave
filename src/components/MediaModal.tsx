@@ -70,17 +70,17 @@ function Episode({ episode, onClick, episodeStreams, isLoadingStreams, onEpisode
     const hasNoStreams = Array.isArray(episodeStreams) && !episodeStreams?.length;
     const [showStreams, setShowStreams] = useState(false);
     let { rating, voteCount } = getRatingAggr(episode._source.ratings);
-    useEffect(() => {
-        console.log(episodeStreams)
-    }, [episodeStreams])
+    // useEffect(() => {
+    //     console.log(episodeStreams)
+    // }, [episodeStreams])
 
-    useEffect(() => {
-        console.log(showStreams)
-    }, [showStreams])
+    // useEffect(() => {
+    //     console.log(showStreams)
+    // }, [showStreams])
 
     return (
-        <div className={`max-w-full relative px-6 py-4 border-2 border-transparent hover:border-yellow-300 hover:border-opacity-100 rounded-xl transition-all duration-500 ease-in-out ${episodeStreams?.length ? "border-yellow-300 border-opacity-60" : ""}`}>
-            <article className="flex items-center space-x-6 duration-500 ease-in-out w-full">
+        <div className={`max-w-full relative px-6 py-4 border-2 border-transparent hover:border-yellow-300 hover:border-opacity-100 rounded-xl transition-all duration-[400ms] ease-in-out ${episodeStreams?.length ? "border-yellow-300 border-opacity-60" : ""}`}>
+            <article className="flex items-center space-x-6 duration-[400ms] ease-in-out w-full">
                 <img src={episodeDetails?.art.poster} alt="" width="60" height="50" className="flex-none rounded-md bg-slate-100 w-16 h-20 object-cover" />
                 <div className="min-w-0 relative flex-auto">
                     <h2 className="font-semibold text-white text-opacity-80 truncate mr-28">{ episodeDetails.title || `Season ${episode._source.info_labels.season}: Episode ${episode._source.info_labels.episode}` }</h2>
@@ -204,7 +204,7 @@ function MediaStreamOption({ stream, isEpisode, onStreamClick }: { stream: Strea
                         <MessageText1 size={22} variant="Bold" className="text-white text-opacity-70" />
                         <p>
                             {
-                                stream.subtitles.map(subtitle => subtitle.language.toUpperCase()).join("/")
+                                stream.subtitles.map(subtitle => subtitle?.language?.toUpperCase()).join("/")
                             }
                         </p>
                     </div> : ""
@@ -288,7 +288,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                     [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
                 }
             })
-            console.log(response.data.hits.hits);
+            // console.log(response.data.hits.hits);
             return response.data.hits.hits;
         } catch(error) {
             console.log(error);
@@ -310,7 +310,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                     }
                 })
                 .then(function (response) {
-                    console.log(response.data.hits.hits);
+                    // console.log(response.data.hits.hits);
                     setSeasons((prevSeasons) => {
                         return {
                             ...prevSeasons,
@@ -349,7 +349,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
         let seasonEpisodes = episodes[season._id];
         if (!seasonEpisodes) {
             seasonEpisodes = await getEpisodes(season);
-            console.log(seasonEpisodes)
+            // console.log(seasonEpisodes)
         }
         setEpisodes((prevEpisodes) => { 
             return { ...prevEpisodes, [season._id]: seasonEpisodes }
@@ -358,7 +358,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
     async function getEpisodeStreams(episode: SeriesObj) {
         let epiStreams = episodeStreams[storeKeyRef.current]?.[episode?._id]
-        console.log(epiStreams)
+        // console.log(epiStreams)
         if (!epiStreams) {
             setIsLoadingEpisodeStreams(episode._id);
             epiStreams = await getMediaStreams(episode);
@@ -376,7 +376,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
             });
         }
         setIsLoadingEpisodeStreams("");
-        console.log(episodeStreams)
+        // console.log(episodeStreams)
     }
 
     function exitModal() {
@@ -541,8 +541,8 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                     <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={isLoadingUrl} />
                 </div>
 
-                <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
-                    <MediaPlayer
+                <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black -bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
+                    {/* <MediaPlayer
                         title={displayDetails?.title || movieDetails.info_labels?.originaltitle}
                         src={mediaUrl.length ? "http://localhost:5000/video/"+mediaUrl : ""}
                         // src={[{
@@ -564,9 +564,9 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                             />
                         </MediaOutlet>
                         <MediaCommunitySkin />
-                    </MediaPlayer>
+                    </MediaPlayer> */}
 
-                    {/* <video
+                    <video
                         id="my-video"
                         className="h-[calc(100%-10px)]"
                         controls
@@ -575,7 +575,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                         data-setup="{}"
                         src={mediaUrl}
                     >
-                    </video> */}
+                    </video>
                         {/* <p className="vjs-no-js">
                         To view this video please enable JavaScript, and consider upgrading to a
                         web browser that
