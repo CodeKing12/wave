@@ -38,3 +38,5 @@ next-env.d.ts
 /public/.project
 /public/.tproject
 /public/config.xml
+
+build.zip
