@@ -30,7 +30,7 @@ function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
     return (
         <a 
             ref={ref}
-            className={`flex gap-5 items-center text-base active:font-semibold cursor-pointer py-2 px-8 w-full border-r-2 border-yellow-300 border-opacity-0 hover:border-opacity-100 hover:text-yellow-300 hover:fill-yellow-300 opacity-80 ${page === current ? "text-yellow-300 fill-yellow-300 opacity-100 border-r-4 border-opacity-100" : ""} ${focused ? "!border-x-4 !border-yellow-300" : ""}`} 
+            className={`flex gap-5 items-center text-base active:font-semibold cursor-pointer py-2 px-8 w-full border-r-2 border-yellow-300 border-opacity-0 hover:border-opacity-100 hover:text-yellow-300 hover:fill-yellow-300 opacity-80 ${page === current ? "text-yellow-300 fill-yellow-300 opacity-100 border-r-4 border-opacity-100" : ""} ${focused ? "!border-x-4 !border-yellow-300 [&>svg]:!text-yellow-300" : ""}`} 
             onClick={() => onItemClick(page)}
         >
             {icon}
@@ -64,8 +64,9 @@ export default function Sidebar({ current, isHidden, isLoggedIn, onHide, onChang
 
     return (
         // <FocusContext.Provider value={focusKey}>
-            <aside className={`w-[300px] bg-black-1 h-full min-h-screen fixed top-0 bottom-0 left-0 pt-20 pb-6 duration-500 ease-in-out ${isHidden ? "-translate-x-full" : ""}`}>
+            <aside className={`sidenav w-[300px] bg-black-1 h-full min-h-screen fixed top-0 bottom-0 left-0 pt-20 pb-6 duration-500 ease-in-out ${isHidden ? "!-left-[300px]" : ""}`}>
                 <FocusLeaf className={`absolute top-0 right-0 opacity-60 hover:opacity-100 duration-300 ease-in-out ${isHidden ? "!-right-10" : ""}`} focusedStyles="!opacity-100" onEnterPress={() => onHide(!isHidden)}>
+                    {/* The right-[260px] is gotten by subtracting the width of the button from the width of the sidebar */}
                     <button className="bg-yellow-300 w-10 h-10 flex justify-center items-center outline-none" onClick={() => onHide(!isHidden)}>
                         {
                             isHidden ?

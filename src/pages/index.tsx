@@ -11,6 +11,8 @@ import Login from '@/components/Login';
 import { Alert, AlertData, AlertInfo } from "@/components/Alert";
 import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
 import FocusLeaf from '@/components/FocusLeaf';
+import MediaModal from '@/components/MediaModal';
+import dummyMedia from "@/media.json";
 
 
 export function parseXml(data: string, param: string) {
@@ -93,7 +95,20 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<String[]>([]);
   const [alerts, setAlerts] = useState<AlertInfo[]>([]);
-  const { ref, focusKey, hasFocusedChild } = useFocusable({trackChildren: true})
+  const { ref, focusKey, hasFocusedChild, focusSelf } = useFocusable({trackChildren: true, forceFocus: true})
+  const [selectedMedia, setSelectedMedia] = useState<MediaObj | undefined>();
+  const [openModal, setOpenModal] = useState(false);
+
+  useEffect(() => {
+    if (!openLogin && !openModal) {
+      console.log("Focused self after login modal close")
+      focusSelf();
+    } 
+    if (isAuthenticated && !openModal) {
+      console.log("Quit media modal")
+      focusSelf();
+    }
+  }, [focusSelf, openLogin, isAuthenticated, openModal])
 
   const addAlert = (alert: AlertData) => {
     setAlerts((prevAlerts) => [...prevAlerts, {...alert, id: prevAlerts.length}]);
@@ -224,6 +239,15 @@ export default function Home() {
       }, [mainRef]
   );
 
+  function onMediaModalClose() {
+      setOpenModal(false);
+  }
+
+  function onMediaCardClick(mediaInfo: MediaObj) {
+    setOpenModal(true);
+    setSelectedMedia(mediaInfo);
+  }
+
   return (
     <main className="bg-[#191919]">
       <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} />
@@ -235,7 +259,7 @@ export default function Home() {
           <div className={`relative flex-1 mt-6 ${hasFocusedChild ? 'menu-expanded' : 'menu-collapsed'}`} ref={ref}>
             {
               media[page] && media[page]?.[pagination[page]]?.length ? 
-              <MediaList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => setOpenLogin(true)} page={page} media={media[page]?.[pagination[page]]} onCardFocus={onCardFocus} />
+              <MediaList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => setOpenLogin(true)} page={page} media={media[page]?.[pagination[page]]} onCardFocus={onCardFocus} onMediaModalOpen={onMediaCardClick} />
               : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
             }
           </div>
@@ -264,6 +288,10 @@ export default function Home() {
       </FocusContext.Provider>
 
       <Login show={openLogin && !isAuthenticated} onLogin={onLogin} onClose={() => setOpenLogin(false)} />
+
+      {/* <Transition> */}
+          <MediaModal show={openModal && isAuthenticated} media={selectedMedia || dummyMedia} authToken={authToken} onExit={onMediaModalClose} />
+      {/* </Transition> */}
       
       <div className="flex flex-col gap-2.5 fixed top-0 pt-3 left-1/2 -translate-x-1/2 h-fit duration-500 ease-in-out">
         {alerts.map((alert) => (

@@ -88,3 +88,41 @@ a, button, input {
 .searchFocus .icon {
   color: #fde047;
 }
+
+.sidenav svg {
+  transition: 0.3s ease-in-out all;
+}
+
+.on-svg-focus svg {
+  color: #191919;
+  fill: #fde047;
+}
+
+.login-input-focus input {
+  border-width: 3px;
+}
+
+.login-button-focus button {
+  background-color: #191919;
+  border-color: #fde047;
+  color: #fde047;
+}
+
+.login-modal input:-webkit-autofill,
+.login-modal input:-webkit-autofill:hover, 
+.login-modal input:-webkit-autofill:focus {
+  background-color: transparent !important;
+  color: #d1d5db !important;
+  -webkit-text-fill-color: #d1d5db;
+  -webkit-box-shadow: 0 0 0px 1000px #191919 inset;
+  transition: all 0.1s ease-in-out;
+}
+
+.modal-root .exit-focus button {
+  background-color: #191919;
+  color: #fde047;
+}
+
+.modal-root .title-focus h2 {
+  color: #fde047;
+}
