@@ -7,11 +7,11 @@ export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
     let selectedDetails;
 
     selectedDetails = mediaI18n?.find((obj: I18nInfoLabel) => obj.lang === "en")
-    if (!selectedDetails || !selectedDetails.hasOwnProperty("art") || !selectedDetails.art.hasOwnProperty("poster")) {
+    if (!selectedDetails || !selectedDetails.hasOwnProperty("art") || !selectedDetails.art.hasOwnProperty("poster") || !selectedDetails.title) {
         let selectedObject = null;
 
         for (const info of mediaI18n) {
-            if (info.art && info.art.poster) {
+            if (info.art && info.art.poster && info.title) {
                 selectedObject = info;
                 break; // Exit the loop once a poster is found
             }

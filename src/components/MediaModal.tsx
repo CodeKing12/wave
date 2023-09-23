@@ -82,6 +82,8 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
     
     useEffect(() => {
         storeKeyRef.current = media._id + "__" + selectedSeason?._id;
+        // console.log(media);
+        // console.log(displayDetails);
     }, [media, selectedSeason])
 
     function onMediaCanLoad(event: any) {
@@ -375,9 +377,11 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                                 </a>
                         </p> */}
 
-                        <button className="w-10 h-10 bg-yellow-200 absolute top-0 right-0 z-[99999] flex items-center justify-center" onClick={() => setMediaUrl("")}>
-                            <Back variant="Bold" />
-                        </button>
+                        <FocusLeaf focusedStyles="[&>button]:!bg-black-1 [&>button]:!text-yellow-300 [&>button]:!border-yellow-300" isFocusable={Boolean(mediaUrl.length)} onEnterPress={() => setMediaUrl("")}>
+                            <button className="w-10 h-10 bg-yellow-200 border-[3px] border-transparent absolute top-0 right-0 z-[99999] flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 hover:border-yellow-300" onClick={() => setMediaUrl("")}>
+                                <Back variant="Bold" />
+                            </button>
+                        </FocusLeaf>
                     </div>
                 </div>
             </div>
