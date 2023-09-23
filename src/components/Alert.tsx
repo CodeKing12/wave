@@ -17,7 +17,7 @@ export interface AlertProps extends AlertInfo {
     onRemove: (id: number) => void;
 }
 
-export function Alert({ id, title, message, type, onRemove }: AlertProps) {
+export default function Alert({ id, title, message, type, onRemove }: AlertProps) {
     const [show, setShow] = useState(false);
 
   useEffect(() => {

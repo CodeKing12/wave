@@ -1,6 +1,5 @@
 import Sidebar, { PageType } from '@/components/Sidebar'
 import { SearchNormal1, ArrowLeft, ArrowRight, SearchNormal } from "iconsax-react"
-import axios from 'axios';
 import { MEDIA_ENDPOINT, PATH_ANIMATED_MOVIES, PATH_ANIMATED_SERIES, PATH_CONCERTS, PATH_FAIRY_TALES, PATH_MOVIES, PATH_MOVIES_CZSK, PATH_SEARCH_MEDIA, PATH_SERIES, PATH_SERIES_CZSK, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE } from '@/components/constants';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import MediaList from '@/components/MediaList';
@@ -8,11 +7,13 @@ import MediaList from '@/components/MediaList';
 import { HashLoader } from 'react-spinners';
 import { MediaObj } from '@/components/MediaTypes';
 import Login from '@/components/Login';
-import { Alert, AlertData, AlertInfo } from "@/components/Alert";
+import Alert, { AlertData, AlertInfo } from "@/components/Alert";
 import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
 import FocusLeaf from '@/components/FocusLeaf';
 import MediaModal from '@/components/MediaModal';
 import dummyMedia from "@/media.json";
+import { useAlert } from "@/pages/AlertContext";
+import axiosInstance from '@/utils/axiosInstance';
 
 
 export function parseXml(data: string, param: string) {
@@ -94,7 +95,6 @@ export default function Home() {
   const prevPagination = useRef(pagination);
   const [query, setQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<String[]>([]);
-  const [alerts, setAlerts] = useState<AlertInfo[]>([]);
   const { ref, focusKey, hasFocusedChild, focusSelf } = useFocusable({trackChildren: true, forceFocus: true})
   const [selectedMedia, setSelectedMedia] = useState<MediaObj | undefined>();
   const [openModal, setOpenModal] = useState(false);
@@ -110,13 +110,7 @@ export default function Home() {
     }
   }, [focusSelf, openLogin, isAuthenticated, openModal])
 
-  const addAlert = (alert: AlertData) => {
-    setAlerts((prevAlerts) => [...prevAlerts, {...alert, id: prevAlerts.length}]);
-  };
-
-  const removeAlert = (id: number) => {
-    setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert.id !== id));
-  };
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     let storedAuth = localStorage.getItem('authToken');
@@ -165,7 +159,7 @@ export default function Home() {
         if (page === "search" && pagination[page] <= 0) {
           media[page] = []
         }
-        axios.get(MEDIA_ENDPOINT + api_map[page], {
+        axiosInstance.get(MEDIA_ENDPOINT + api_map[page], {
           params: {
             [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
             from: pagination[page] > 0 ? mediaPerPage * pagination[page] : undefined,
@@ -230,6 +224,7 @@ export default function Home() {
 
   const onCardFocus = useCallback(
       ({ y }: { y: number }) => {
+        console.log("Heree")
           if (mainRef.current) {
             mainRef.current.scrollTo({
                 top: y,
@@ -254,7 +249,7 @@ export default function Home() {
 
       <FocusContext.Provider value={focusKey}>
         <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
-          <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} showFavorites={() => console.log(media[page])} />
+          <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} showFavorites={() => console.log("Clicked Faves")} />
           
           <div className={`relative flex-1 mt-6 ${hasFocusedChild ? 'menu-expanded' : 'menu-collapsed'}`} ref={ref}>
             {
@@ -292,19 +287,6 @@ export default function Home() {
       {/* <Transition> */}
           <MediaModal show={openModal && isAuthenticated} media={selectedMedia || dummyMedia} authToken={authToken} onExit={onMediaModalClose} />
       {/* </Transition> */}
-      
-      <div className="flex flex-col gap-2.5 fixed top-0 pt-3 left-1/2 -translate-x-1/2 h-fit duration-500 ease-in-out">
-        {alerts.map((alert) => (
-          <Alert
-            key={alert.id}
-            id={alert.id}
-            title={alert.title}
-            message={alert.message}
-            type={alert.type}
-            onRemove={removeAlert}
-          />
-        ))}
-      </div>
     </main>
   )
 }

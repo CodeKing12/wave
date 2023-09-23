@@ -8,18 +8,23 @@ import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-naviga
 export default function MediaList({ media, isAuthenticated, authToken, onMovieSelect, onCardFocus, onMediaModalOpen, isModalOpen }: any) {
     // const { ref, focusKey, hasFocusedChild } = useFocusable()
 
-    function displayMediaInfo(mediaInfo: MediaObj) {
-        // setSelectedMedia(mediaInfo);
-        onMediaModalOpen(mediaInfo);
-    }
+    const displayMediaInfo = useCallback(
+        (mediaInfo: MediaObj) => {
+            // setSelectedMedia(mediaInfo);
+            onMediaModalOpen(mediaInfo);
+        }, [onMediaModalOpen]
+    )
 
-    function onCardSelect(mediaInfo: MediaObj) {
-        isAuthenticated ? displayMediaInfo(mediaInfo) : onMovieSelect(true)
-    }
+    const onCardSelect = useCallback(
+        (mediaInfo: MediaObj) => {
+            isAuthenticated ? displayMediaInfo(mediaInfo) : onMovieSelect(true)
+        }, [displayMediaInfo, isAuthenticated, onMovieSelect]
+    )
 
     const onCardPress = useCallback((mediaInfo: MediaObj) => {
+        console.log("Card Pressed")
         onCardSelect(mediaInfo);
-    }, []);
+    }, [onCardSelect]);
 
 
     return (

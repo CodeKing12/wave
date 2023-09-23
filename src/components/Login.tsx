@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { CloseCircle, Login as LoginIcon } from "iconsax-react";
 import { AUTH_ENDPOINT, PATH_LOGIN, PATH_SALT, authAxiosConfig } from "./constants";
@@ -8,6 +7,7 @@ import { parseXml } from "@/pages";
 import { PacmanLoader } from "react-spinners";
 import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 import FocusLeaf from "./FocusLeaf";
+import axiosInstance from "@/utils/axiosInstance";
 
 interface LoginProps {
     show: boolean;
@@ -45,7 +45,7 @@ export default function Login({ show, onLogin, onClose }: LoginProps) {
 
         let salt = "";
         let token = "";
-        axios.post(AUTH_ENDPOINT + PATH_SALT,
+        axiosInstance.post(AUTH_ENDPOINT + PATH_SALT,
         {
             username_or_email: username
         }, authAxiosConfig)
@@ -53,7 +53,7 @@ export default function Login({ show, onLogin, onClose }: LoginProps) {
             function (response) {
                 salt = parseXml(response.data, "salt")
                 const hashedPassword = sha1(md5crypt(password, salt));
-                axios.post(AUTH_ENDPOINT + PATH_LOGIN, {
+                axiosInstance.post(AUTH_ENDPOINT + PATH_LOGIN, {
                     username_or_email: username,
                     keep_logged_in: 1,
                     password: hashedPassword

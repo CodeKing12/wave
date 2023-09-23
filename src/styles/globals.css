@@ -100,6 +100,7 @@ a, button, input {
 
 .login-input-focus input {
   border-width: 3px;
+  border-color: #fde047;
 }
 
 .login-button-focus button {
@@ -118,11 +119,42 @@ a, button, input {
   transition: all 0.1s ease-in-out;
 }
 
-.modal-root .exit-focus button {
+.media-modal .exit-focus button {
   background-color: #191919;
   color: #fde047;
 }
 
-.modal-root .title-focus h2 {
+.media-modal .title-focus h2 {
   color: #fde047;
+}
+
+.media-modal .content {
+  position: relative;
+}
+
+.media-modal .content::after {
+  display: block;
+  content: " ";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  transform: scaleX(0);
+  background-color: transparent;
+  transition: all 0.3s ease-in-out;
+}
+
+.media-modal .content.on-focus::after {
+  transform: scaleX(1);
+  background-color: #fde047;
+}
+
+.icon-stream {
+  @apply text-white text-opacity-60 duration-300 ease-in-out
+}
+
+.stream-focus .icon-stream {
+  @apply text-opacity-100
 }

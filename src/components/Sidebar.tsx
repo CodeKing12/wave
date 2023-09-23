@@ -25,7 +25,7 @@ interface SidebarProps {
 }
 
 function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
-    const { ref, focused } = useFocusable();
+    const { ref, focused } = useFocusable({onEnterPress: () => onItemClick(page)});
 
     return (
         <a 

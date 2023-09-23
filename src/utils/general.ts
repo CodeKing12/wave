@@ -1,10 +1,10 @@
 import { LeanMediaStream, MediaObj, SeriesObj, StreamObj, VideoStream } from "@/components/MediaTypes";
 import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig } from "@/components/constants";
 import { parseXml } from "@/pages";
-import axios from "axios";
 import { stream_p } from "./Stream";
 import { md5crypt } from "./MD5";
 import { sha1 } from "./Sha";
+import axiosInstance from "./axiosInstance";
 
 export function uuidv4():string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -116,7 +116,7 @@ export function secondsToHMS(seconds: number) {
 
 export async function getFilePasswordSalt(ident: string): Promise<string> {
     try {
-        const response = await axios.post(AUTH_ENDPOINT + PATH_FILE_PASSWORD_SALT, { ident }, authAxiosConfig);
+        const response = await axiosInstance.post(AUTH_ENDPOINT + PATH_FILE_PASSWORD_SALT, { ident }, authAxiosConfig);
         return parseXml(response.data, "salt");
     } catch (error) {
         console.log("An error occured while seasoning: ", error);
@@ -129,7 +129,7 @@ export async function getVideoLink(ident: string, token: string, https: boolean,
     const UUID = getUUID();
 
     try {
-        let response = await axios.post(AUTH_ENDPOINT + PATH_FILE_LINK, {
+        let response = await axiosInstance.post(AUTH_ENDPOINT + PATH_FILE_LINK, {
             ident,
             wst: token,
             device_uuid: UUID,
@@ -154,7 +154,7 @@ export async function getStreamUrl(token: string, stream: StreamObj) {
     const leanStream = transformStreamObj(stream);
 
     try {
-        const response = await axios.post(AUTH_ENDPOINT + PATH_FILE_PROTECTED, { ident }, authAxiosConfig);
+        const response = await axiosInstance.post(AUTH_ENDPOINT + PATH_FILE_PROTECTED, { ident }, authAxiosConfig);
         const isProtected = parseXml(response.data, "protected") === "1";
 
         if (isProtected) {
@@ -174,7 +174,7 @@ export async function getStreamUrl(token: string, stream: StreamObj) {
 
 export async function getMediaStreams(media: MediaObj | SeriesObj) {
     try {
-        let response = await axios.get(MEDIA_ENDPOINT + `/api/media/${media._id}/streams`, {
+        let response = await axiosInstance.get(MEDIA_ENDPOINT + `/api/media/${media._id}/streams`, {
             params: {
                 [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
             }
