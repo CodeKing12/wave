@@ -158,3 +158,11 @@ a, button, input {
 .stream-focus .icon-stream {
   @apply text-opacity-100
 }
+
+.logout-btn button {
+  color: #fde047 !important;
+}
+
+.logout-btn svg {
+  color: #fff !important;
+}

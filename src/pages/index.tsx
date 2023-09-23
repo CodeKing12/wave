@@ -259,12 +259,12 @@ export default function Home() {
             }
           </div>
           <div className={`flex items-center justify-between mt-10 ${loading ? "opacity-40 pointer-events-none" : "opacity-100 pointer-events-auto"}`}>
-            <div className={pagination[page] + 1 === 1 ? "cursor-not-allowed" : ""}>
-              <button className={`px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4 ${pagination[page] + 1 === 1 ? "opacity-40 pointer-events-none" : ""}`} onClick={() => updatePagination(page, -1)}>
-                  <ArrowLeft size={32} variant='Bold' />
-                  Previous
-              </button>
-            </div>
+              <FocusLeaf className={pagination[page] + 1 === 1 ? "cursor-not-allowed" : ""} focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300" isFocusable={pagination[page] + 1 !== 1} onEnterPress={() => updatePagination(page, -1)}>
+                <button className={`px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4 ${pagination[page] + 1 === 1 ? "opacity-40 pointer-events-none" : ""}`} onClick={() => updatePagination(page, -1)}>
+                    <ArrowLeft size={32} variant='Bold' />
+                    Previous
+                </button>
+              </FocusLeaf>
 
             {
               typeof pagination[page] == "number" && pagination[page] >= 0 ?
@@ -272,12 +272,12 @@ export default function Home() {
               : ""
             }
 
-            <div className={pagination[page] + 1 === Math.ceil(totals[page] / mediaPerPage) ? "cursor-not-allowed" : ""}>
+            <FocusLeaf className={pagination[page] + 1 === Math.ceil(totals[page] / mediaPerPage) ? "cursor-not-allowed" : ""} focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300" isFocusable={pagination[page] + 1 !== Math.ceil(totals[page] / mediaPerPage)} onEnterPress={() => updatePagination(page, +1)}>
               <button className={`px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4 ${pagination[page] + 1 === Math.ceil(totals[page] / mediaPerPage) ? "opacity-40 pointer-events-none" : ""}`} onClick={() => updatePagination(page, +1)}>
                   Next
                   <ArrowRight size={32} variant='Bold' />
               </button>
-            </div>
+            </FocusLeaf>
           </div>
         </section>
       </FocusContext.Provider>

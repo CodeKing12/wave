@@ -92,8 +92,8 @@ export default function Sidebar({ current, isHidden, isLoggedIn, onHide, onChang
                 </div>
                 {
                     isLoggedIn ? (
-                        <FocusLeaf focusedStyles="logout-btn">
-                            <button className="mt-auto text-opacity-70 text-white font-medium flex items-center gap-3 py-2 px-8 text-[17px] hover:text-yellow-300 group duration-500 ease-in-out absolute bottom-[18px]" onClick={onLogout}>
+                        <FocusLeaf className="absolute bottom-[18px]" focusedStyles="logout-btn">
+                            <button className="mt-auto text-opacity-70 text-white font-medium flex items-center gap-3 py-2 px-8 text-[17px] hover:text-yellow-300 group duration-500 ease-in-out" onClick={onLogout}>
                                 Logout
                                 <Logout className="text-yellow-300 group-hover:text-white duration-500 ease-in-out" />
                             </button>
