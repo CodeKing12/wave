@@ -1,7 +1,7 @@
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { init } from '@noriginmedia/norigin-spatial-navigation';
-import { AlertProvider } from './AlertContext';
+import AlertProvider from './AlertContext';
 import Alerts from '@/components/Alerts';
 import Head from 'next/head';
 

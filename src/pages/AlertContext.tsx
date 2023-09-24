@@ -19,7 +19,7 @@ export const useAlert = () => {
   return useContext(AlertContext);
 };
 
-export const AlertProvider = ({ children }: { children: ReactNode }) => {
+export default function AlertProvider({ children }: { children: ReactNode }) {
   const [alerts, setAlerts] = useState<AlertInfo[]>([]);
 
   const addAlert = (alert: AlertData) => {
