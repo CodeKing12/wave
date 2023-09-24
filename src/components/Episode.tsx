@@ -41,7 +41,7 @@ export default function Episode({ episode, onClick, episodeStreams, isLoadingStr
     });
 
     useEffect(() => {
-        console.log(Boolean(episodeStreams?.length))
+        // console.log(Boolean(episodeStreams?.length))
         episodeStreams?.length ? setFocus(episode._id) : ""
     }, [episodeStreams, episode._id])
 

@@ -22,7 +22,7 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
     )
 
     const onCardPress = useCallback((mediaInfo: MediaObj) => {
-        console.log("Card Pressed")
+        // console.log("Card Pressed")
         onCardSelect(mediaInfo);
     }, [onCardSelect]);
 

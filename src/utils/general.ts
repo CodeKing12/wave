@@ -1,5 +1,5 @@
 import { LeanMediaStream, MediaObj, SeriesObj, StreamObj, VideoStream } from "@/components/MediaTypes";
-import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig } from "@/components/constants";
+import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_INFO, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, PATH_USER_DATA, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig } from "@/components/constants";
 import { parseXml } from "@/pages";
 import { stream_p } from "./Stream";
 import { md5crypt } from "./MD5";
@@ -124,6 +124,16 @@ export async function getFilePasswordSalt(ident: string): Promise<string> {
     }
 }
 
+export async function getUsername(token: string): Promise<string> {
+    try {
+        const response = await axiosInstance.post(AUTH_ENDPOINT + PATH_USER_DATA, { wst: token }, authAxiosConfig);
+        return parseXml(response.data, "username");
+    } catch (error) {
+        console.log("An error occured while getting username: ", error);
+        throw error; // Return an empty string or handle the error appropriately
+    }
+}
+
 
 export async function getVideoLink(ident: string, token: string, https: boolean, password?: string) {
     const UUID = getUUID();
@@ -160,6 +170,7 @@ export async function getStreamUrl(token: string, stream: StreamObj) {
         if (isProtected) {
             const salt = await getFilePasswordSalt(ident);
             const password = sha1(md5crypt(stream_p(leanStream), salt));
+            // axiosInstance.post(AUTH_ENDPOINT + PATH_FILE_INFO, { ident, password }, authAxiosConfig)
             const mediaUrl = await getVideoLink(ident, token, https, password)
             return mediaUrl;
         } else {
@@ -201,4 +212,17 @@ export function formatStringAsId(input: string) {
     const trimmedString = formattedString.replace(/^_+|_+$/g, '');
   
     return trimmedString;
+}
+
+export async function checkWebshareStatus(token: string) {
+    let success = true;
+    try {
+        const username = await getUsername(token);
+        if (!username.length) {
+            success = false
+        }
+    } catch(error) {
+        success = false;
+    }
+    return success;
 }

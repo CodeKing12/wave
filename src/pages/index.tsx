@@ -14,6 +14,7 @@ import MediaModal from '@/components/MediaModal';
 import dummyMedia from "@/media.json";
 import { useAlert } from "@/pages/AlertContext";
 import axiosInstance from '@/utils/axiosInstance';
+import { checkWebshareStatus, getUsername } from '@/utils/general';
 
 
 export function parseXml(data: string, param: string) {
@@ -101,11 +102,11 @@ export default function Home() {
 
   useEffect(() => {
     if (!openLogin && !openModal) {
-      console.log("Focused self after login modal close")
+      // console.log("Focused self after login modal close")
       focusSelf();
     } 
     if (isAuthenticated && !openModal) {
-      console.log("Quit media modal")
+      // console.log("Quit media modal")
       focusSelf();
     }
   }, [focusSelf, openLogin, isAuthenticated, openModal])
@@ -113,16 +114,20 @@ export default function Home() {
   const { addAlert } = useAlert();
 
   useEffect(() => {
-    let storedAuth = localStorage.getItem('authToken');
-    const storedToken: TokenObj = JSON.parse(storedAuth || "{}");
-    const currentTime = new Date().getTime();
-
-    if (storedToken.expiration && (currentTime < storedToken.expiration)) {
-      setAuthToken(storedToken.value);
-      setIsAuthenticated(true);
-    } else {
-      localStorage.removeItem("authToken");
+    async function retrieveToken() {
+      let storedAuth = localStorage.getItem('authToken');
+      const storedToken: TokenObj = JSON.parse(storedAuth || "{}");
+      const currentTime = new Date().getTime();
+      const isValid = await checkWebshareStatus(storedToken.value)
+  
+      if (isValid && storedToken.expiration && (currentTime < storedToken.expiration)) {
+        setAuthToken(storedToken.value);
+        setIsAuthenticated(true);
+      } else {
+        localStorage.removeItem("authToken");
+      }
     }
+    retrieveToken();
   }, []);
   
   const mediaPerPage = 100
@@ -187,7 +192,6 @@ export default function Home() {
   }, [page, pagination, searchHistory]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
   function searchMedia() {
-    console.log(query, searchHistory[searchHistory.length - 1])
     if (query.length && query !== searchHistory[searchHistory.length - 1]) {
       setSearchHistory([...searchHistory, query]);
       updatePagination("search");
@@ -224,7 +228,6 @@ export default function Home() {
 
   const onCardFocus = useCallback(
       ({ y }: { y: number }) => {
-        console.log("Heree")
           if (mainRef.current) {
             mainRef.current.scrollTo({
                 top: y,
@@ -249,7 +252,7 @@ export default function Home() {
 
       <FocusContext.Provider value={focusKey}>
         <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
-          <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} showFavorites={() => console.log("Clicked Faves")} />
+          <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} showFavorites={() => console.log("Clicked Favorites")} />
           
           <div className={`relative flex-1 mt-6 ${hasFocusedChild ? 'menu-expanded' : 'menu-collapsed'}`} ref={ref}>
             {

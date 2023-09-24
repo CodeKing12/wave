@@ -31,7 +31,7 @@ export default function Login({ show, onLogin, onClose }: LoginProps) {
     });
 
     useEffect(() => {
-        console.log(show)
+        // console.log(show)
         if (show) {
             focusSelf();
         }
@@ -67,7 +67,7 @@ export default function Login({ show, onLogin, onClose }: LoginProps) {
                         expirationDate.setDate(expirationDate.getDate() + 3);
                         
                         const tokenData = {
-                            token,
+                            value: token,
                             expiration: expirationDate.getTime()
                             // expiration: new Date().getTime() + 3 * 60 * 1000 // This sets it to expire after 3 mins (for testing purposes)
                         }

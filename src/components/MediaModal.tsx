@@ -74,7 +74,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
     });
    
     useEffect(() => {
-        console.log(show)
+        // console.log(show)
         if (show) {
             focusSelf();
         }
@@ -205,9 +205,9 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
     const onDetailFocus = useCallback(
         ({ y }: { y: number }) => {
-          console.log("Detail Scroll")
+        //   console.log("Detail Scroll")
             if (ref.current) {
-                console.log(y)
+                // console.log(y)
                 ref.current.scrollTo({
                     top: y,
                     behavior: 'smooth'
@@ -218,17 +218,15 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
     const onEpisodeFocus = useCallback(
         (focusDetails: FocusDetails, isNotTvMedia?: boolean, isEpisodeList?: boolean) => {
-          console.log("SubMedia Scroll")
+        //   console.log("SubMedia Scroll")
             if (ref.current) {
                 let offsetTop = 0;
-                console.log(focusDetails)
+                // console.log(focusDetails)
                 const parentStyles = window.getComputedStyle(focusDetails.node.offsetParent)
                 const parentPaddingTop = parentStyles.getPropertyValue("padding-top")
                 offsetTop = focusDetails.node.offsetTop - parseFloat(parentPaddingTop) - 30;
-                console.log(offsetTop)
                 if (tvMediaRef && !isNotTvMedia) {
                     offsetTop = tvMediaRef.current?.offsetTop + focusDetails.y - 30
-                    console.log(offsetTop)
                 }
                 // if (episodeListRef && isEpisodeList) {
                 //     offsetTop = focusDetails.node.offsetParent.off
@@ -237,7 +235,6 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                     top: offsetTop,
                     behavior: 'smooth'
                 });
-                console.log(focusDetails)
             }
         }, [ref]
     );
@@ -378,7 +375,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                         </p> */}
 
                         <FocusLeaf focusedStyles="[&>button]:!bg-black-1 [&>button]:!text-yellow-300 [&>button]:!border-yellow-300" isFocusable={Boolean(mediaUrl.length)} onEnterPress={() => setMediaUrl("")}>
-                            <button className="w-10 h-10 bg-yellow-200 border-[3px] border-transparent absolute top-0 right-0 z-[99999] flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 hover:border-yellow-300" onClick={() => setMediaUrl("")}>
+                            <button className="w-10 h-10 bg-yellow-300 border-[3px] border-transparent absolute top-0 right-0 z-[99999] flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 hover:border-yellow-300" onClick={() => setMediaUrl("")}>
                                 <Back variant="Bold" />
                             </button>
                         </FocusLeaf>
