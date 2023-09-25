@@ -32,13 +32,17 @@ export default function MediaDetails({ movieTitle, displayDetails, movieDetails,
                     <h2 className="font-semibold text-white opacity-90 text-4xl mb-6">{ movieTitle }</h2>
                 </FocusLeaf>
 
-                <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
-                    <p className="max-w-[600px] leading-loose mb-8">
-                        {
-                            displayDetails?.plot
-                        }
-                    </p>
-                </FocusLeaf>
+                {
+                    displayDetails?.plot ? (
+                        <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
+                            <p className="max-w-[600px] leading-loose mb-8">
+                                {
+                                    displayDetails?.plot
+                                }
+                            </p>
+                        </FocusLeaf>
+                    ) : ""
+                }
 
                 <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
                     <div className="grid grid-cols-2 gap-7 text-[17px] mb-8">
