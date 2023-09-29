@@ -10,8 +10,8 @@ export default function MediaStreamOption({ stream, isEpisode, onFocus, onStream
     });
 
     return (
-        <div className={`flex items-center justify-between ${isEpisode ? "gap-10" : "gap-20"}`} ref={ref}>
-            <div className={`flex gap-8 text-[15px] text-gray-300 text-opacity-50 ${focused ? "stream-focus" : ""}`}>
+        <div className={`flex flex-col md:flex-row items-center justify-between ${isEpisode ? "gap-10" : "gap-10 md:gap-16 xl:gap-20"}`} ref={ref}>
+            <div className={`flex flex-wrap xl:flex-nowrap justify-center md:justify-left gap-x-8 gap-y-4 xl:!gap-8 text-[15px] text-gray-300 text-opacity-50 ${focused ? "stream-focus" : ""}`}>
                 {
                     stream.video.length ?
                     <div className="duration flex flex-col gap-1.5 items-center">
@@ -87,7 +87,8 @@ export default function MediaStreamOption({ stream, isEpisode, onFocus, onStream
                         <PlayCircle size={40} variant="Bold" className={`text-yellow-300 duration-300 ease-in-out ${focused ? "!text-white" : ""}`} />
                     </button>
                 : (
-                    <button className={`h-16 w-12 bg-yellow-300 text-black-1 rounded-md text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex justify-center items-center gap-4 ${focused ? "!bg-black-1 !border-yellow-300 !text-yellow-300" : ""}`} onClick={() => onStreamClick()}>
+                    <button className={`xl:h-16 xl:w-12 px-5 py-3 xl:!p-0 bg-yellow-300 text-sm text-black-1 rounded-md text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex justify-center items-center gap-4 ${focused ? "!bg-black-1 !border-yellow-300 !text-yellow-300" : ""}`} onClick={() => onStreamClick()}>
+                        <span className="xl:hidden">Watch</span>
                         <PlayCircle size={28} variant="Bold" />
                     </button>
                 )

@@ -27,7 +27,7 @@ export default function MediaDetails({ movieTitle, displayDetails, movieDetails,
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className="max-w-[620px] mr-8" ref={ref}>
+            <div className="xl:max-w-[620px] mr-8" ref={ref}>
                 <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
                     <h2 className="font-semibold text-white opacity-90 text-4xl mb-6">{ movieTitle }</h2>
                 </FocusLeaf>
@@ -35,7 +35,7 @@ export default function MediaDetails({ movieTitle, displayDetails, movieDetails,
                 {
                     displayDetails?.plot ? (
                         <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
-                            <p className="max-w-[600px] leading-loose mb-8">
+                            <p className="xl:max-w-[600px] leading-loose mb-8">
                                 {
                                     displayDetails?.plot
                                 }
@@ -45,7 +45,7 @@ export default function MediaDetails({ movieTitle, displayDetails, movieDetails,
                 }
 
                 <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
-                    <div className="grid grid-cols-2 gap-7 text-[17px] mb-8">
+                    <div className="grid md:grid-cols-2 gap-7 text-[17px] mb-8">
                         <p className="flex flex-col gap-2">
                             <span className="text-[15px] opacity-40">Release Date: </span>
                             <span className="">{ formatDate(movieDetails.info_labels?.premiered) || "" }</span>
@@ -74,7 +74,7 @@ export default function MediaDetails({ movieTitle, displayDetails, movieDetails,
                 </FocusLeaf>
 
                 <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
-                    <div className="grid grid-cols-2 gap-7 text-[17px] mb-8">
+                    <div className="grid md:grid-cols-2 gap-7 text-[17px] mb-8">
                         <p className="flex flex-col gap-2">
                             <span className="text-[15px] opacity-40">Run Time: </span>
                             <span className="">{ convertSecondsToTime(movieDetails.info_labels.duration) }</span>

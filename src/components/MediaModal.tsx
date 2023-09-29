@@ -243,14 +243,14 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className={`media-modal fixed top-0 bottom-0 left-0 right-0 w-full h-full p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 z-0 ${show ? "!translate-x-0 !opacity-100 !visible !z-50" : ""}`}>
+            <div className={`media-modal fixed top-0 bottom-0 left-0 right-0 w-full h-full py-16 px-5 xs:px-7 xsm:px-10 md:px-16 lg:px-20 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 z-0 overflow-y-scroll xl:overflow-hidden ${show ? "!translate-x-0 !opacity-100 !visible !z-50" : ""}`}>
                 <FocusLeaf className="absolute top-0 right-0" focusedStyles="exit-focus" onEnterPress={exitModal}>
                     <button className="bg-yellow-300 text-black-1 w-14 h-14 flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 border-[3px] border-yellow-300" onClick={exitModal}>
                         <Back size={30} variant="Bold" />
                     </button>
                 </FocusLeaf>
-                <div className="flex justify-center gap-20 h-full">
-                    <div className="min-w-[500px] w-[500px] h-full relative bg-[#191919] rounded-[30px] bg-opacity-75">
+                <div className="flex flex-col xl:flex-row justify-center gap-14 xl:gap-20 xl:h-full">
+                    <div className="w-full max-w-[350px] mx-auto h-[500px] xl:h-full xl:min-w-[500px] xl:w-[500px] relative bg-[#191919] rounded-[30px] bg-opacity-75">
                         {
                             displayDetails?.art?.poster ?
                             <img key={media._id} src={displayDetails.art.poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
@@ -258,14 +258,14 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                         }
                     </div>
 
-                    <div className="modal-content min-w-[550px] py-10 text-gray-300 overflow-y-scroll hide-scrollbar relative duration-300 ease-in-out" ref={ref}> {/* max-w-[620px] */}                        
+                    <div className="modal-content w-full xl:min-w-[550px] py-10 text-gray-300 xl:overflow-y-scroll hide-scrollbar relative duration-300 ease-in-out" ref={ref}> {/* max-w-[620px] */}                        
                         <MediaDetails movieTitle={movieTitle} displayDetails={displayDetails} movieDetails={movieDetails} rating={rating} voteCount={voteCount} onFocus={onDetailFocus} />
 
                         {
                             movieDetails.info_labels.mediatype === "tvshow" ? "" : (
                                 <div className={`mt-12 mb-6 ${streams?.length ? "" : "w-[600px]"}`}>
                                     <p className="text-base opacity-60 text-center mb-5">Available Streams</p>
-                                    <div className="flex flex-col gap-10">
+                                    <div className="flex flex-col gap-20 md:gap-16 lg:gap-12 xl:gap-10">
                                         {
                                             streams?.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onFocus={(focusDetails: FocusDetails) => onEpisodeFocus(focusDetails, true)} onStreamClick={() => handleStreamPlay(stream)} />)
                                             : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -275,7 +275,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                             ) 
                         }
 
-                        <div className="flex gap-12 mt-10">
+                        <div className="flex flex-col xsm:flex-row justify-center items-center xsm:justify-start xsm:items-start xl:gap-12 mt-16 xl:mt-10">
                             <FocusLeaf focusedStyles="[&>button]:!bg-opacity-5 [&>button]:!border-white [&>button]:!text-white" customFocusKey="FAVE-BTN" onFocus={(focusDetails: FocusDetails) => onEpisodeFocus(focusDetails, true)}>
                                 <button className="px-10 py-3 bg-white text-black-1 rounded-xl text-[15px] tracking-wide font-bold border-4 border-transparent hover:bg-opacity-5 hover:border-white hover:text-white flex items-center gap-4">
                                     <HeartAdd size={32} variant="Bold" />

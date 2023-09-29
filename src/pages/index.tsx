@@ -230,7 +230,7 @@ export default function Home() {
               : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
             }
           </div>
-          <div className={`flex items-center justify-between mt-10 ${loading ? "opacity-40 pointer-events-none" : "opacity-100 pointer-events-auto"}`}>
+          <div className={`flex flex-col gap-7 sm:gap-0 sm:flex-row items-center sm:justify-between mt-10 ${loading ? "opacity-40 pointer-events-none" : "opacity-100 pointer-events-auto"}`}>
               <FocusLeaf className={pagination[page] + 1 === 1 ? "cursor-not-allowed" : ""} focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300" isFocusable={pagination[page] + 1 !== 1} onEnterPress={() => updatePagination(page, -1)}>
                 <button className={`px-9 py-3 bg-yellow-300 text-black-1 rounded-xl text-lg font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex items-center gap-4 ${pagination[page] + 1 === 1 ? "opacity-40 pointer-events-none" : ""}`} onClick={() => updatePagination(page, -1)}>
                     <ArrowLeft size={32} variant='Bold' />
@@ -257,7 +257,9 @@ export default function Home() {
       <Login show={openLogin && !isAuthenticated} onLogin={onLogin} onClose={() => setOpenLogin(false)} />
 
       {/* <Transition> */}
-          <MediaModal show={openModal && isAuthenticated} media={selectedMedia || dummyMedia} authToken={authToken} onExit={onMediaModalClose} />
+        {
+          selectedMedia && openModal && <MediaModal show={openModal && isAuthenticated} media={selectedMedia || dummyMedia} authToken={authToken} onExit={onMediaModalClose} />
+        }
       {/* </Transition> */}
     </main>
   )
