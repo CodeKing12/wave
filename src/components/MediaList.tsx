@@ -5,7 +5,7 @@ import { useState, useCallback } from "react";
 import Transition from "./Transition";
 import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
 
-export default function MediaList({ media, isAuthenticated, authToken, onMovieSelect, onCardFocus, onMediaModalOpen, isModalOpen }: any) {
+export default function MediaList({ media, isAuthenticated, authToken, onMovieSelect, onCardFocus, onMediaModalOpen, isModalOpen, isSidebarOpen }: any) {
     // const { ref, focusKey, hasFocusedChild } = useFocusable()
 
     const displayMediaInfo = useCallback(
@@ -32,7 +32,8 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
             {/* <FocusContext.Provider value={focusKey}> */}
                 {/* <div className={`${hasFocusedChild ? 'menu-expanded' : 'menu-collapsed'}`} ref={ref}> */}
                 <div>
-                    <div className={`flex justify-center flex-wrap gap-4 ${isModalOpen ? "!overflow-hidden" : ""}`}>
+                    {/* <div className={`flex justify-center flex-wrap gap-4 ${isModalOpen ? "!overflow-hidden" : ""}`}> */}
+                    <div id="media-list" className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-center flex-wrap gap-y-4 gap-x-1 md:gap-x-2 ${isModalOpen ? "!overflow-hidden" : ""} ${isSidebarOpen ? "!grid-cols-1 xsm:!grid-cols-2 sm:!grid-cols-3 lg:!grid-cols-4 xl:!grid-cols-5 2xl:!grid-cols-6" : ""}`}>
                         {
                             media.length ? media.map((show: MediaObj, index: number) => (
                                 <MediaCard key={index} media={show?._source} showMediaInfo={() => onCardSelect(show)} onEnterPress={() => onCardPress(show)} onFocus={onCardFocus} />

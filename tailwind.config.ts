@@ -19,6 +19,16 @@ const config: Config = {
       colors: {
         "black-1": "#21201E",
         "brand-orange": "#FF8A65"
+      },
+      screens: {
+        xs: '330px',
+        xsm: '576px',
+        sm: '640px',
+        md: '768px',
+        lg: '992px',
+        xl: '1200px',
+        '2xl': '1400px',
+        '3xl': '1536px'
       }
     },
   },

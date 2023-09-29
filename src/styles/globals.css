@@ -166,3 +166,48 @@ a, button, input {
 .logout-btn svg {
   color: #fff !important;
 }
+
+@media (min-width: 420px) and (max-width: 576px) {
+  #media-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 420px) and (max-width: 475px) {
+  #media-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .media-card {
+    height: 300px;
+  }
+}
+
+@media (min-width: 680px) and (max-width: 768px) {
+  .media-card {
+    height: 350px !important;
+  }
+}
+
+@media (min-width: 475px) and (max-width: 576px) {
+  .media-card {
+    max-width: 250px !important;
+    height: 350px !important;
+  }
+}
+
+@media (min-width: 865px) and (max-width: 992px) {
+  .media-card {
+    max-width: 260px !important;
+    height: 400px !important;
+    max-height: 400px !important;
+  }
+}
+
+@media (min-width: 585px) and (max-width: 640px) {
+  .media-card {
+    max-width: 255px !important;
+    height: 380px !important;
+    max-height: 400px !important;
+  }
+}

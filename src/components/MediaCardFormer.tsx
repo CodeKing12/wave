@@ -72,19 +72,18 @@ export default function MediaCard({ media, showMediaInfo, onEnterPress, onFocus 
     }
 
     return (
-    //   <div className={`w-[240px] h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
-      <div className={`media-card max-w-[250px] xsm:w-full xsm:max-w-[230px] mx-auto h-[340px] max-h-[340px] sm:h-[300px] md:h-[100%] sm:max-h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
+      <div className={`w-[240px] h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
         {
             /* eslint-disable @next/next/no-img-element */
             displayDetails?.art?.poster ?
-            <img className="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={displayDetails?.art.poster} alt={displayDetails?.plot} />
+            <img width={240} height={330} className="w-full h-[330px] object-cover rounded-xl opacity-75" src={displayDetails?.art.poster} alt={displayDetails?.plot} />
             : <ImageIcon size={85} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
             /* eslint-enable @next/next/no-img-element */
         }
         <div className={`w-full h-full absolute bottom-0 py-5 px-3 text-gray-100 bg-black bg-opacity-80 rounded-[11px] opacity-0 group-hover:opacity-100 invisible group-hover:visible ease-in-out duration-[400ms] ${focused ? "!duration-300 !visible !opacity-100" : ""}`} onClick={() => showMediaInfo(true)}>
             <div className="flex flex-col justify-between h-full">
                 <div>
-                    <h5 className="text-base lg:text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ displayDetails?.title || media.info_labels?.originaltitle }</h5>
+                    <h5 className="text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ displayDetails?.title || media.info_labels?.originaltitle }</h5>
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-gray-400">{genres}</p>
                         <p className="text-sm text-gray-400 text-opacity-80">{premiere_date.getFullYear() || ""}</p>
@@ -114,9 +113,9 @@ export default function MediaCard({ media, showMediaInfo, onEnterPress, onFocus 
                         <Heart width={20} className="group-hover:-fill-black-1" />
                     </button>
 
-                    {/* <button className="px-10 py-3 bg-yellow-300 text-black-1 rounded-xl text-sm tracking-wide font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300">
+                    <button className="px-10 py-3 bg-yellow-300 text-black-1 rounded-xl text-sm tracking-wide font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300">
                         Watch
-                    </button> */}
+                    </button>
                 </div>
             </div>
         </div>

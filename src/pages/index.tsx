@@ -15,6 +15,7 @@ import dummyMedia from "@/media.json";
 import { useAlert } from "@/pages/AlertContext";
 import axiosInstance from '@/utils/axiosInstance';
 import { checkWebshareStatus, getUsername } from '@/utils/general';
+import Navbar from '@/components/Navbar';
 
 
 export function parseXml(data: string, param: string) {
@@ -37,45 +38,9 @@ interface MediaType {
   [page: string]: MediaObj[][] | undefined
 };
 
-interface NavProps {
-  query: string;
-  updateQuery: (value: string) => void;
-  onSearch: () => void;
-  showFavorites: () => void;
-}
-
 interface TokenObj {
   value: string,
   expiration: number
-}
-
-function Navbar({ query, updateQuery, onSearch, showFavorites }: NavProps) {
-  const { ref, focusKey, focused, hasFocusedChild } = useFocusable()
-
-  return (
-    <FocusContext.Provider value={focusKey}>
-      <nav className={`flex items-center justify-between ${focused ? "!duration-300 border-4 border-yellow-300" : ""}`} ref={ref}>
-        <div className="flex gap-12 items-center text-white text-opacity-80 font-medium">
-          <FocusLeaf focusedStyles="after:block animateUnderline">
-            <a className="cursor-pointer" onClick={showFavorites}>Favorites</a>
-          </FocusLeaf>
-          <FocusLeaf focusedStyles="after:block animateUnderline">
-            <a className="cursor-pointer">Watched</a>
-          </FocusLeaf>
-        </div>
-
-        <FocusLeaf isForm className="text-[#AEAFB2]" focusedStyles="searchFocus" onEnterPress={onSearch}>
-          <form className="relative group">
-              <input className="w-[350px] h-14 px-14 py-3 text-white text-sm bg-gray-700 bg-opacity-10 rounded-xl border border-[rgba(249,249,249,0.10)] placeholder:text-gray-300 placeholder:text-sm outline-none" placeholder="Search Movies or TV Shows" onChange={(e) => updateQuery(e.target.value)} />
-              <SearchNormal1 size={24} className="absolute top-1/2 -translate-y-1/2 left-4 icon ease-in-out duration-300" />
-              <button className={`w-8 h-8 bg-yellow-300 rounded-lg absolute top-1/2 -translate-y-1/2 right-4 flex items-center justify-center opacity-0 invisible -group-hover:visible -group-hover:opacity-100 ease-in-out ${query ? "!visible !opacity-100" : ""}`} onClick={(e) => {e.preventDefault();onSearch()}}>
-                <SearchNormal variant="Bold" color="#21201E" size={16} />
-              </button>
-          </form>
-        </FocusLeaf>
-      </nav>
-    </FocusContext.Provider>
-  )
 }
 
 export default function Home() {
@@ -128,6 +93,10 @@ export default function Home() {
       }
     }
     retrieveToken();
+    
+    if (window.screen.height < 1200) {
+      setHideSidebar(true)
+    }
   }, []);
   
   const mediaPerPage = 100
@@ -251,13 +220,13 @@ export default function Home() {
       <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} />
 
       <FocusContext.Provider value={focusKey}>
-        <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-20 font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
+        <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-5 xs:px-6 xsm:px-8 md:px-14 xl:px-16 xxl:px-20 font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
           <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} showFavorites={() => console.log("Clicked Favorites")} />
           
           <div className={`relative flex-1 mt-6 ${hasFocusedChild ? 'menu-expanded' : 'menu-collapsed'}`} ref={ref}>
             {
               media[page] && media[page]?.[pagination[page]]?.length ? 
-              <MediaList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => setOpenLogin(true)} page={page} media={media[page]?.[pagination[page]]} onCardFocus={onCardFocus} onMediaModalOpen={onMediaCardClick} />
+              <MediaList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => setOpenLogin(true)} page={page} media={media[page]?.[pagination[page]]} onCardFocus={onCardFocus} onMediaModalOpen={onMediaCardClick} isSidebarOpen={hideSidebar} />
               : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
             }
           </div>
