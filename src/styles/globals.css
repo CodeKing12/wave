@@ -213,3 +213,29 @@ a, button, input {
     max-height: 400px !important;
   }
 }
+
+@media (min-width: 890px) and (max-width: 992px) {
+  #media-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .media-card {
+    height: 300px !important;
+  }
+}
+
+@media (min-width: 1100px) and (max-width: 1200px) {
+  #media-list:not(.listIsHidden) {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  .media-card {
+    height: 300px !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  #sidenav.is-loading {
+    display: none;
+  }
+}

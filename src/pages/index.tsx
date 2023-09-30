@@ -64,6 +64,7 @@ export default function Home() {
   const { ref, focusKey, hasFocusedChild, focusSelf } = useFocusable({trackChildren: true, forceFocus: true})
   const [selectedMedia, setSelectedMedia] = useState<MediaObj | undefined>();
   const [openModal, setOpenModal] = useState(false);
+  const [finishedLoading, setFinishedLoading] = useState(false);
 
   useEffect(() => {
     if (!openLogin && !openModal) {
@@ -94,9 +95,10 @@ export default function Home() {
     }
     retrieveToken();
     
-    if (window.screen.height < 1200) {
-      setHideSidebar(true)
+    if (window.screen.width < 1200) {
+      setHideSidebar(true);
     }
+    setFinishedLoading(true)
   }, []);
   
   const mediaPerPage = 100
@@ -153,6 +155,7 @@ export default function Home() {
             }))
             // console.log([response.data.hits.hits])
             setLoading(false);
+            page === "search" ? "" : focusSelf();
           }
         )
       }
@@ -217,10 +220,10 @@ export default function Home() {
 
   return (
     <main className="bg-[#191919]">
-      <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} />
+      <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} finishedLoading={finishedLoading} />
 
       <FocusContext.Provider value={focusKey}>
-        <section className={`flex-1 min-h-screen ml-[270px] flex flex-col pt-10 pb-16 px-5 xs:px-6 xsm:px-8 md:px-14 xl:px-16 xxl:px-20 font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
+        <section className={`flex-1 min-h-screen lg:ml-[300px] flex flex-col pt-10 pb-16 px-5 xs:px-6 xsm:px-8 md:px-14 xl:px-16 xxl:px-[72px] font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
           <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} showFavorites={() => console.log("Clicked Favorites")} />
           
           <div className={`relative flex-1 mt-6 ${hasFocusedChild ? 'menu-expanded' : 'menu-collapsed'}`} ref={ref}>

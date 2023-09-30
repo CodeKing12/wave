@@ -73,7 +73,7 @@ export default function MediaCard({ media, showMediaInfo, onEnterPress, onFocus 
 
     return (
     //   <div className={`w-[240px] h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
-      <div className={`media-card max-w-[250px] xsm:w-full xsm:max-w-[230px] mx-auto h-[340px] max-h-[340px] sm:h-[300px] md:h-[100%] sm:max-h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
+      <div className={`media-card max-w-[250px] w-full xsm:max-w-[230px] mx-auto h-[340px] max-h-[340px] sm:h-[300px] md:h-[100%] sm:max-h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
         {
             /* eslint-disable @next/next/no-img-element */
             displayDetails?.art?.poster ?

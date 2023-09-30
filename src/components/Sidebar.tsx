@@ -19,6 +19,7 @@ interface SidebarProps {
     current: PageType,
     isHidden: boolean,
     isLoggedIn: boolean;
+    finishedLoading: boolean;
     onHide: (isHidden: boolean) => void,
     onChange: (newVal: PageType) => void,
     onLogout: () => void,
@@ -39,7 +40,7 @@ function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
     )
 }
 
-export default function Sidebar({ current, isHidden, isLoggedIn, onHide, onChange, onLogout }: SidebarProps) {
+export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn, onHide, onChange, onLogout }: SidebarProps) {
     const {
         ref,
         focusSelf,
@@ -61,11 +62,11 @@ export default function Sidebar({ current, isHidden, isLoggedIn, onHide, onChang
     useEffect(() => {
         focusSelf();
     }, [focusSelf]);
-
+    
     return (
         // <FocusContext.Provider value={focusKey}>
-            <aside className={`sidenav w-[300px] bg-black-1 h-full min-h-screen fixed top-0 bottom-0 left-0 pt-20 pb-6 duration-500 ease-in-out ${isHidden ? "!-left-[300px]" : ""}`}>
-                <FocusLeaf className={`absolute top-0 right-0 opacity-60 hover:opacity-100 duration-300 ease-in-out ${isHidden ? "!-right-10" : ""}`} focusedStyles="!opacity-100" onEnterPress={() => onHide(!isHidden)}>
+            <aside id="sidenav" className={`sidenav z-[100] w-[300px] bg-black-1 h-full min-h-screen fixed top-0 bottom-0 left-0 pt-20 pb-6 duration-500 ease-in-out ${isHidden ? "!-left-[300px]" : ""} ${finishedLoading ? "" : "is-loading"}`}>
+                <FocusLeaf className={`absolute top-0 right-0 opacity-60 hover:opacity-100 duration-300 ease-in-out ${isHidden ? "!-right-10 opacity-80" : ""}`} focusedStyles="!opacity-100" onEnterPress={() => onHide(!isHidden)}>
                     {/* The right-[260px] is gotten by subtracting the width of the button from the width of the sidebar */}
                     <button className="bg-yellow-300 w-10 h-10 flex justify-center items-center outline-none" onClick={() => onHide(!isHidden)}>
                         {
