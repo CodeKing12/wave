@@ -169,17 +169,25 @@ a, button, input {
   color: #fff !important;
 }
 
-@media (min-width: 420px) and (max-width: 576px) {
+@media (max-width: 380px) {
   #media-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  .media-card {
+    max-width: 235px;
+    height: 340px;
+    max-height: unset;
+  }
+}
+
+@media (min-width: 380px) and (max-width: 420px) {
+  .media-card {
+    height: 260px;
   }
 }
 
 @media (min-width: 420px) and (max-width: 475px) {
-  #media-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
   .media-card {
     height: 300px;
   }

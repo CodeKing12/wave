@@ -84,13 +84,13 @@ export default function MediaCard({ media, showMediaInfo, onEnterPress, onFocus 
         <div className={`w-full h-full absolute bottom-0 py-5 px-3 text-gray-100 bg-black bg-opacity-80 rounded-[11px] opacity-0 group-hover:opacity-100 invisible group-hover:visible ease-in-out duration-[400ms] ${focused ? "!duration-300 !visible !opacity-100" : ""}`} onClick={() => showMediaInfo(true)}>
             <div className="flex flex-col justify-between h-full">
                 <div>
-                    <h5 className="text-base lg:text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ displayDetails?.title || media.info_labels?.originaltitle }</h5>
-                    <div className="flex items-center justify-between">
+                    <h5 className="text-[15px] sm:text-base lg:text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ displayDetails?.title || media.info_labels?.originaltitle }</h5>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                         <p className="text-sm text-gray-400">{genres}</p>
                         <p className="text-sm text-gray-400 text-opacity-80">{premiere_date.getFullYear() || ""}</p>
                     </div>
                     <div className="flex items-center justify-between mt-2">
-                        <div className="flex gap-0.5">
+                        <div className="flex gap-0.5 scale-90 sm:scale-100">
                             {
                                 Array(Math.round(rating)).fill("").map((value, index) => {
                                     return (
