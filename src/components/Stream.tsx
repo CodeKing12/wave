@@ -88,7 +88,7 @@ export default function MediaStreamOption({ stream, isEpisode, onFocus, onStream
                     </button>
                 : (
                     <button className={`xl:h-16 xl:w-12 px-5 py-3 xl:!p-0 bg-yellow-300 text-sm text-black-1 rounded-md text-base tracking-wide font-bold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300 flex justify-center items-center gap-4 ${focused ? "!bg-black-1 !border-yellow-300 !text-yellow-300" : ""}`} onClick={() => onStreamClick()}>
-                        <span className="xl:hidden">Watch</span>
+                        <span className="xl:hidden font-semibold">Watch</span>
                         <PlayCircle size={28} variant="Bold" />
                     </button>
                 )
