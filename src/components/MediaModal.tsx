@@ -17,11 +17,13 @@ import Episode from "./Episode";
 import Season from "./Season";
 import axiosInstance from "@/utils/axiosInstance";
 import EpisodeList from "./EpisodeList";
+import Image from "next/image";
 
 interface MediaModalProps {
     show: boolean;
     media: MediaObj,
     authToken: string,
+    onAuth: () => void;
     onExit: () => void;
 }
 
@@ -38,7 +40,7 @@ export interface SeriesStreamObj {
 }
 
 
-export default function MediaModal({ show, media, authToken, onExit }: MediaModalProps) {
+export default function MediaModal({ show, media, authToken, onAuth, onExit }: MediaModalProps) {
     const displayDetails = getDisplayDetails(media._source.i18n_info_labels)
     const movieDetails = media._source;
     const [showEpisodes, setShowEpisodes] = useState(false);
@@ -148,14 +150,18 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
     }, [media._id, streams]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
     async function handleStreamPlay(stream: StreamObj) {
-        setIsLoadingUrl(true);
-        setSelectedStream(stream);
-        const mediaLink = await getStreamUrl(authToken, stream);
-        if (mediaLink) {
-            // console.log(mediaLink)
-            setMediaUrl(mediaLink)
-        };
-        setIsLoadingUrl(false);
+        if (authToken.length) {
+            setIsLoadingUrl(true);
+            setSelectedStream(stream);
+            const mediaLink = await getStreamUrl(authToken, stream);
+            if (mediaLink) {
+                // console.log(mediaLink)
+                setMediaUrl(mediaLink)
+            };
+            setIsLoadingUrl(false);
+        } else {
+            onAuth();
+        }
     }
 
     async function onSeasonClick(season: SeriesObj) {
@@ -253,7 +259,7 @@ export default function MediaModal({ show, media, authToken, onExit }: MediaModa
                     <div className="w-full max-w-[350px] mx-auto h-[500px] xl:h-full xl:min-w-[500px] xl:w-[500px] relative bg-[#191919] rounded-[30px] bg-opacity-75">
                         {
                             displayDetails?.art?.poster ?
-                            <img key={media._id} src={displayDetails.art.poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
+                            <Image width={600} height={600} key={media._id} src={displayDetails.art.poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
                             : <ImageIcon size={170} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
                         }
                     </div>

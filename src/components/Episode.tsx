@@ -52,7 +52,7 @@ export default function Episode({ episode, onClick, episodeStreams, isLoadingStr
     return (
         <div className={`max-w-full relative px-6 py-4 border-2 border-transparent hover:border-yellow-300 hover:border-opacity-100 rounded-xl transition-all duration-[400ms] ease-in-out ${episodeStreams?.length ? "border-yellow-300 border-opacity-60" : ""} ${focused ? "!border-yellow-300 !border-opacity-100" : ""}`} ref={ref}>
             <article className="flex items-center space-x-6 duration-[400ms] ease-in-out w-full">
-                <img src={episodeDetails?.art.poster} alt="" width="60" height="50" className="flex-none rounded-md bg-slate-100 w-16 h-20 object-cover" />
+                <img src={episodeDetails?.art?.poster} alt="" width="60" height="50" className="flex-none rounded-md bg-slate-100 w-16 h-20 object-cover" />
                 <div className="min-w-0 relative flex-auto">
                     <h2 className="font-semibold text-white text-opacity-80 truncate mr-28">{ episodeDetails.title || `Season ${episode._source.info_labels.season}: Episode ${episode._source.info_labels.episode}` }</h2>
                     <dl className="mt-2.5 flex flex-wrap text-sm leading-6 font-medium text-gray-300 text-opacity-90">

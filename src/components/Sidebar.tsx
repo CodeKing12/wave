@@ -53,7 +53,7 @@ export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn
         // updateAllLayouts, -- to force update all layouts when needed
         // getCurrentFocusKey -- to get the current focus key
     } = useFocusable({
-        focusable: true,
+        focusable: !isHidden,
         trackChildren: true,
         autoRestoreFocus: true,
         onArrowPress: () => true,
@@ -62,7 +62,7 @@ export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn
     useEffect(() => {
         focusSelf();
     }, [focusSelf]);
-    
+
     return (
         // <FocusContext.Provider value={focusKey}>
             <aside id="sidenav" className={`sidenav z-[100] w-[300px] bg-black-1 h-full min-h-screen fixed top-0 bottom-0 left-0 pt-20 pb-6 duration-500 ease-in-out ${isHidden ? "!-left-[300px]" : ""} ${finishedLoading ? "" : "is-loading"}`}>
@@ -93,7 +93,7 @@ export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn
                 </div>
                 {
                     isLoggedIn ? (
-                        <FocusLeaf className="absolute bottom-[18px]" focusedStyles="logout-btn">
+                        <FocusLeaf className="absolute bottom-[18px] logout-btn" focusedStyles="logout-btn-onfocus">
                             <button className="mt-auto text-opacity-70 text-white font-medium flex items-center gap-3 py-2 px-8 text-[17px] hover:text-yellow-300 group duration-500 ease-in-out" onClick={onLogout}>
                                 Logout
                                 <Logout className="text-yellow-300 group-hover:text-white duration-500 ease-in-out" />

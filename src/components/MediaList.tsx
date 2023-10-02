@@ -17,8 +17,9 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
 
     const onCardSelect = useCallback(
         (mediaInfo: MediaObj) => {
-            isAuthenticated ? displayMediaInfo(mediaInfo) : onMovieSelect(true)
-        }, [displayMediaInfo, isAuthenticated, onMovieSelect]
+            // isAuthenticated ? displayMediaInfo(mediaInfo) : onMovieSelect(true)
+            displayMediaInfo(mediaInfo)
+        }, [displayMediaInfo]
     )
 
     const onCardPress = useCallback((mediaInfo: MediaObj) => {

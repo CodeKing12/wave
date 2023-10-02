@@ -1,6 +1,7 @@
 import { Heart, Star1, Image as ImageIcon } from "iconsax-react";
 import { I18nInfoLabel, RatingObj } from "./MediaTypes";
 import { useFocusable } from "@noriginmedia/norigin-spatial-navigation";
+import Image from "next/image";
 
 
 export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
@@ -77,7 +78,7 @@ export default function MediaCard({ media, showMediaInfo, onEnterPress, onFocus 
         {
             /* eslint-disable @next/next/no-img-element */
             displayDetails?.art?.poster ?
-            <img className="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={displayDetails?.art.poster} alt={displayDetails?.plot} />
+            <Image width={300} height={400} className="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={displayDetails?.art.poster} alt={displayDetails?.plot} />
             : <ImageIcon size={85} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
             /* eslint-enable @next/next/no-img-element */
         }

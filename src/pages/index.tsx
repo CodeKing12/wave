@@ -261,7 +261,7 @@ export default function Home() {
 
       {/* <Transition> */}
         {
-          selectedMedia && openModal && <MediaModal show={openModal && isAuthenticated} media={selectedMedia || dummyMedia} authToken={authToken} onExit={onMediaModalClose} />
+          selectedMedia && openModal && <MediaModal show={openModal && isAuthenticated} media={selectedMedia || dummyMedia} authToken={authToken} onAuth={() => setOpenLogin(true)} onExit={onMediaModalClose} />
         }
       {/* </Transition> */}
     </main>

@@ -161,11 +161,11 @@ a, button, input {
   @apply text-opacity-100
 }
 
-.logout-btn button {
+.logout-btn-onfocus button {
   color: #fde047 !important;
 }
 
-.logout-btn svg {
+.loglogout-btn-onfocus svg {
   color: #fff !important;
 }
 
@@ -245,5 +245,18 @@ a, button, input {
 @media (max-width: 1200px) {
   #sidenav.is-loading {
     display: none;
+  }
+}
+
+@media (max-height: 725px) {
+  .logout-btn {
+    top: 4px;
+    height: fit-content;
+  }
+}
+
+@media (min-width: 1500px) {
+  #media-list {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
   }
 }
