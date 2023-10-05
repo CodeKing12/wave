@@ -2,6 +2,8 @@ import { Heart, Star1, Image as ImageIcon } from "iconsax-react";
 import { I18nInfoLabel, RatingObj } from "./MediaTypes";
 import { useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 import Image from "next/image";
+import { resolveArtItem, smallPoster } from "@/utils/general";
+import { useState } from "react";
 
 
 export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
@@ -54,11 +56,17 @@ export default function MediaCard({ media, showMediaInfo, onEnterPress, onFocus 
     let genres: string;
     let { rating, voteCount } = getRatingAggr(media?.ratings);
     const premiere_date = new Date(media.info_labels?.premiered);
-    const displayDetails = getDisplayDetails(media.i18n_info_labels);
+    const poster = resolveArtItem(media.i18n_info_labels, "poster");
+    const [posterLink, setPosterLink] = useState(smallPoster(poster))
+    let displayDetails = getDisplayDetails(media.i18n_info_labels);
     const { ref, focused } = useFocusable({
         onEnterPress,
         onFocus
     });
+
+    function onImgError(event: any) {
+        setPosterLink(smallPoster(poster, true))
+    }
 
     // if (!displayDetails) {
     //     if (media && media.i18n_info_labels) {
@@ -77,8 +85,9 @@ export default function MediaCard({ media, showMediaInfo, onEnterPress, onFocus 
       <div className={`media-card max-w-[250px] w-full xsm:max-w-[230px] mx-auto h-[340px] max-h-[340px] sm:h-[300px] md:h-[100%] sm:max-h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
         {
             /* eslint-disable @next/next/no-img-element */
-            displayDetails?.art?.poster ?
-            <Image width={300} height={400} className="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={displayDetails?.art.poster} alt={displayDetails?.plot} />
+            poster ?
+            // <Image width={300} height={400} className="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={smallPoster(poster) || ""} alt={displayDetails?.plot} />
+            <Image width={300} height={400} className="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={posterLink || ""} alt={displayDetails?.plot} onError={onImgError} />
             : <ImageIcon size={85} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
             /* eslint-enable @next/next/no-img-element */
         }

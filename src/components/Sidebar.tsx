@@ -22,6 +22,7 @@ interface SidebarProps {
     finishedLoading: boolean;
     onHide: (isHidden: boolean) => void,
     onChange: (newVal: PageType) => void,
+    onLoginClick: () => void,
     onLogout: () => void,
 }
 
@@ -40,7 +41,7 @@ function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
     )
 }
 
-export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn, onHide, onChange, onLogout }: SidebarProps) {
+export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn, onHide, onChange, onLogout, onLoginClick }: SidebarProps) {
     const {
         ref,
         focusSelf,
@@ -93,13 +94,20 @@ export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn
                 </div>
                 {
                     isLoggedIn ? (
-                        <FocusLeaf className="absolute bottom-[18px] logout-btn" focusedStyles="logout-btn-onfocus">
+                        <FocusLeaf className="absolute bottom-[18px] logout-btn" focusedStyles="logout-btn-onfocus" onEnterPress={onLogout}>
                             <button className="mt-auto text-opacity-70 text-white font-medium flex items-center gap-3 py-2 px-8 text-[17px] hover:text-yellow-300 group duration-500 ease-in-out" onClick={onLogout}>
                                 Logout
                                 <Logout className="text-yellow-300 group-hover:text-white duration-500 ease-in-out" />
                             </button>
                         </FocusLeaf>
-                    ) : ""
+                    ) : (
+                        <FocusLeaf className="absolute bottom-[18px] login-btn" focusedStyles="login-btn-onfocus" onEnterPress={onLoginClick}>
+                            <button className="py-2.5 px-8 bg-yellow-300 bg-opacity-90 hover:bg-transparent text-black-1 mt-auto font-semibold flex items-center gap-3 hover:text-yellow-300 group border-2 border-l-0 border-yellow-300 duration-500 ease-in-out" onClick={onLoginClick}>
+                                Login
+                                <Logout className="text-black group-hover:text-yellow-300 duration-500 ease-in-out" variant="Bold" />
+                            </button>
+                        </FocusLeaf>
+                    )
                 }
             </aside>
         // </FocusContext.Provider>

@@ -3,10 +3,11 @@ import { Barcode, Clock, Document, MessageText1, PlayCircle, Size, VolumeHigh } 
 import { StreamObj } from "./MediaTypes";
 import { FocusDetails, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 
-export default function MediaStreamOption({ stream, isEpisode, onFocus, onStreamClick }: { stream: StreamObj, isEpisode?: boolean, onFocus?: (focusDetails: FocusDetails) => void, onStreamClick: () => void }) {
+export default function MediaStreamOption({ stream, isEpisode, authToken, onFocus, onStreamClick }: { stream: StreamObj, isEpisode?: boolean, authToken?: string, onFocus?: (focusDetails: FocusDetails) => void, onStreamClick: () => void }) {
     const { ref, focused } = useFocusable({
         onEnterPress: onStreamClick,
-        onFocus
+        onFocus,
+        focusable: authToken && authToken?.length ? true : false
     });
 
     return (

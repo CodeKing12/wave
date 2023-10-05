@@ -1,4 +1,4 @@
-import { LeanMediaStream, MediaObj, SeriesObj, StreamObj, VideoStream } from "@/components/MediaTypes";
+import { Art, I18nInfoLabel, Info2, LeanMediaStream, MediaObj, SeriesObj, StreamObj, VideoStream } from "@/components/MediaTypes";
 import { AUTH_ENDPOINT, MEDIA_ENDPOINT, PATH_FILE_INFO, PATH_FILE_LINK, PATH_FILE_PASSWORD_SALT, PATH_FILE_PROTECTED, PATH_USER_DATA, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, authAxiosConfig } from "@/components/constants";
 import { parseXml } from "@/pages";
 import { stream_p } from "./Stream";
@@ -145,7 +145,8 @@ export async function getVideoLink(ident: string, token: string, https: boolean,
             device_uuid: UUID,
             force_https: https ? 1 : 0,
             download_type: "video_stream",
-            device_vendor: "ymovie",
+            // Available download types are 'file_download', 'video_stream' and 'audio_stream'
+            device_vendor: "wave",
             password
         }, authAxiosConfig)
 
@@ -226,3 +227,69 @@ export async function checkWebshareStatus(token: string) {
     }
     return success;
 }
+
+export function smallPoster(source: string | undefined, retry=false): string | undefined {
+    if(!source)
+        return undefined;
+        
+    let url = source.replace("http://", "https://");
+
+    // https://www.themoviedb.org/talk/53c11d4ec3a3684cf4006400
+    // http://image.tmdb.org/t/p/original/4W24saRPKCJIwsvrf76zmV6FlsD.jpg
+    if(url.indexOf("image.tmdb.org") > -1) {
+        return url.replace("/original/", "/w300/");
+    }
+
+    // https://img.csfd.cz/files/images/film/posters/158/066/158066908_cf9118.jpg
+    // to https://image.pmgstatic.com/cache/resized/w180/files/images/film/posters/158/066/158066908_cf9118.jpg
+    if(url.indexOf("img.csfd.cz") > -1) {
+        if (retry) {
+            return url.replace("//img.csfd.cz", "//image.pmgstatic.com/cache/resized/w180");
+        }
+        return url.replace("//img.csfd.cz", "//image.pmgstatic.com/cache/resized/w360");
+    }
+
+    // https://image.pmgstatic.com/files/images/film/posters/167/107/167107831_b01ee4.jpg
+    // to https://image.pmgstatic.com/cache/resized/w180/files/images/film/posters/167/107/167107831_b01ee4.jpg
+    if(url.indexOf("//image.pmgstatic.com/files") > -1)
+        return url.replace("//image.pmgstatic.com/files", "//image.pmgstatic.com/cache/resized/w360/files");
+
+    // https://thetvdb.com/banners/series/375903/posters/5e86c5d2a7fcb.jpg
+    // to https://thetvdb.com/banners/series/375903/posters/5e86c5d2a7fcb_t.jpg
+    // https://thetvdb.com/banners/posters/71470-2.jpg
+    // to // https://thetvdb.com/banners/posters/71470-2_t.jpg
+    if(url.indexOf("thetvdb.com") > -1)
+        return url.replace(/^(?!.+_t)(.+)(\.[a-z]+)$/, "$1_t$2");
+
+    // https://assets.fanart.tv/fanart/movies/13475/movieposter/star-trek-54d39f41a8ab8.jpg
+    // to https://fanart.tv/detailpreview/fanart/movies/13475/movieposter/star-trek-54d39f41a8ab8.jpg
+    if(url.indexOf("assets.fanart.tv") > -1)
+        return url.replace("assets.fanart.tv", "fanart.tv/detailpreview");
+    return url;
+}
+
+export function mergeI18n(list:Array<I18nInfoLabel>): Info2 {
+    const result: any = {};
+    list.forEach(item => {
+        Object.keys(item).forEach(key => {
+            if(!result[key])
+                result[key] = (<any>item)[key];
+        })
+    })
+    return <Info2>result;
+}
+
+export function resolveArtItem(list: Array<I18nInfoLabel>, key: keyof Art): string | undefined {
+    const missing1 = "https://image.tmdb.org/t/p/originalnull";
+    const missing2 = /^https:\/\/img.csfd.cz\/assets\/b[0-9]+\/images\/poster-free\.png$/;
+    
+    for (const info of list){
+        const url = info?.art?.[key];
+        if(url && url != missing1 && !url?.match(missing2))
+            return url;
+    }
+    return undefined;
+}
+
+
+// The media (Pred Marazem) (when you search for prep) doesnt have a poster 

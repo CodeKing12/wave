@@ -25,7 +25,7 @@ export default function Navbar({ query, updateQuery, onSearch, showFavorites }: 
           </div>
   
           <FocusLeaf isForm className="w-full lg:w-fit text-[#AEAFB2]" focusedStyles="searchFocus" onEnterPress={onSearch}>
-            <form className="relative group">
+            <form className="relative group" onSubmit={(e) => {e.preventDefault();onSearch()}}>
                 <input className="w-full lg:w-[350px] h-14 px-14 py-3 text-white text-sm bg-gray-700 bg-opacity-10 rounded-xl border border-[rgba(249,249,249,0.10)] placeholder:text-gray-300 placeholder:text-sm outline-none" placeholder="Search Movies or TV Shows" onChange={(e) => updateQuery(e.target.value)} />
                 <SearchNormal1 size={24} className="absolute top-1/2 -translate-y-1/2 left-4 icon ease-in-out duration-300" />
                 <button className={`w-8 h-8 bg-yellow-300 rounded-lg absolute top-1/2 -translate-y-1/2 right-4 flex items-center justify-center opacity-0 invisible -group-hover:visible -group-hover:opacity-100 ease-in-out ${query ? "!visible !opacity-100" : ""}`} onClick={(e) => {e.preventDefault();onSearch()}}>

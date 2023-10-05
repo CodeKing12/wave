@@ -27,7 +27,7 @@ export default function MediaDetails({ movieTitle, displayDetails, movieDetails,
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className="xl:max-w-[620px] mr-8" ref={ref}>
+            <div className="media-details xl:max-w-[620px] mr-8" ref={ref}>
                 <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
                     <h2 className="font-semibold text-white opacity-90 text-4xl mb-6">{ movieTitle }</h2>
                 </FocusLeaf>

@@ -161,12 +161,17 @@ a, button, input {
   @apply text-opacity-100
 }
 
-.logout-btn-onfocus button {
+.logout-btn-onfocus button, .login-btn-onfocus svg {
   color: #fde047 !important;
 }
 
-.loglogout-btn-onfocus svg {
+.logout-btn-onfocus svg {
   color: #fff !important;
+}
+
+.login-btn-onfocus button {
+  background-color: transparent;
+  color: #fde047;
 }
 
 @media (max-width: 380px) {
@@ -249,7 +254,7 @@ a, button, input {
 }
 
 @media (max-height: 725px) {
-  .logout-btn {
+  .logout-btn, .login-btn {
     top: 4px;
     height: fit-content;
   }
@@ -258,5 +263,18 @@ a, button, input {
 @media (min-width: 1500px) {
   #media-list {
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  }
+
+  .media-modal .poster {
+    width: 65% !important;
+    max-width: 70% !important;
+  }
+
+  .media-modal .media-streams {
+    width: unset;
+  }
+
+  .media-modal .media-details, .media-modal .media-streams {
+    max-width: 90%;
   }
 }

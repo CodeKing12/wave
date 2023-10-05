@@ -220,7 +220,7 @@ export default function Home() {
 
   return (
     <main className="bg-[#191919]">
-      <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} finishedLoading={finishedLoading} />
+      <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} finishedLoading={finishedLoading} onLoginClick={() => setOpenLogin(true)} />
 
       <FocusContext.Provider value={focusKey}>
         <section className={`flex-1 min-h-screen lg:ml-[300px] flex flex-col pt-10 pb-16 px-3 xs:px-4 xsm:px-8 md:px-14 xl:px-16 xxl:px-[72px] font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
@@ -261,7 +261,7 @@ export default function Home() {
 
       {/* <Transition> */}
         {
-          selectedMedia && openModal && <MediaModal show={openModal && isAuthenticated} media={selectedMedia || dummyMedia} authToken={authToken} onAuth={() => setOpenLogin(true)} onExit={onMediaModalClose} />
+          selectedMedia && openModal && <MediaModal show={openModal} media={selectedMedia || dummyMedia} authToken={authToken} onAuth={() => setOpenLogin(true)} onExit={onMediaModalClose} />
         }
       {/* </Transition> */}
     </main>

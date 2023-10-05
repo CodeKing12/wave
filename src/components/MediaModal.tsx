@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {MEDIA_ENDPOINT, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, proxyUrl } from "./constants";
 import Skeleton from "react-loading-skeleton";
 import { HashLoader } from "react-spinners";
-import { getMediaStreams, getStreamUrl, setWidths } from "@/utils/general";
+import { getMediaStreams, getStreamUrl, resolveArtItem, setWidths } from "@/utils/general";
 import 'vidstack/styles/defaults.css';
 import 'vidstack/styles/community-skin/video.css';
 import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster } from '@vidstack/react';
@@ -42,6 +42,8 @@ export interface SeriesStreamObj {
 
 export default function MediaModal({ show, media, authToken, onAuth, onExit }: MediaModalProps) {
     const displayDetails = getDisplayDetails(media._source.i18n_info_labels)
+    const poster = resolveArtItem(media._source.i18n_info_labels, "poster");
+    const fanart = resolveArtItem(media._source.i18n_info_labels, "fanart");
     const movieDetails = media._source;
     const [showEpisodes, setShowEpisodes] = useState(false);
     const [streams, setStreams] = useState([]);
@@ -119,6 +121,7 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
             if (modalContent) {
                 modalContent.scrollTop = 0
             }
+            // Fetch TVShow information
             if (movieDetails.info_labels.mediatype === "tvshow") {
                 axiosInstance.get(MEDIA_ENDPOINT + `/api/media/filter/v2/parent?sort=episode`, {
                     params: {
@@ -135,6 +138,7 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                         }
                     });
                 })
+            // Fetch available streams for the media
             } else {
                 if (!media._streams) {
                     const mediaStreams = await getMediaStreams(media);
@@ -249,17 +253,17 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className={`media-modal fixed top-0 bottom-0 left-0 right-0 w-full h-full py-16 px-5 xs:px-7 xsm:px-10 md:px-16 lg:px-20 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 z-0 overflow-y-scroll xl:overflow-hidden ${show ? "!translate-x-0 !opacity-100 !visible !z-50" : ""}`}>
+            <div className={`media-modal fixed top-0 bottom-0 left-0 right-0 w-full h-full py-16 px-5 xs:px-7 xsm:px-10 md:px-16 lg:px-20 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 z-0 overflow-y-scroll xl:overflow-hidden ${show ? "!translate-x-0 !opacity-100 !visible !z-[200]" : ""}`}>
                 <FocusLeaf className="absolute top-0 right-0" focusedStyles="exit-focus" onEnterPress={exitModal}>
                     <button className="bg-yellow-300 text-black-1 w-14 h-14 flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 border-[3px] border-yellow-300" onClick={exitModal}>
                         <Back size={30} variant="Bold" />
                     </button>
                 </FocusLeaf>
                 <div className="flex flex-col xl:flex-row justify-center gap-14 xl:gap-20 xl:h-full">
-                    <div className="w-full max-w-[350px] mx-auto h-[500px] xl:h-full xl:min-w-[500px] xl:w-[500px] relative bg-[#191919] rounded-[30px] bg-opacity-75">
+                    <div className="poster w-full max-w-[350px] mx-auto h-[500px] xl:h-full xl:min-w-[500px] xl:w-[500px] relative bg-[#191919] rounded-[30px] bg-opacity-75">
                         {
-                            displayDetails?.art?.poster ?
-                            <Image width={600} height={600} key={media._id} src={displayDetails.art.poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
+                            poster ?
+                            <Image width={600} height={600} key={media._id} src={poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
                             : <ImageIcon size={170} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
                         }
                     </div>
@@ -268,12 +272,17 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                         <MediaDetails movieTitle={movieTitle} displayDetails={displayDetails} movieDetails={movieDetails} rating={rating} voteCount={voteCount} onFocus={onDetailFocus} />
 
                         {
+                            authToken.length ? "" : 
+                            <p className="text-red-500 font-medium text-lg my-5">Login to watch</p>
+                        }
+
+                        {
                             movieDetails.info_labels.mediatype === "tvshow" ? "" : (
-                                <div className={`mt-12 mb-6 ${streams?.length ? "" : "w-[600px]"}`}>
+                                <div className={`media-streams mt-12 mb-6 opacity-100 duration-300 ease-in-out ${streams?.length ? "" : "w-[600px]"} ${authToken.length ? "" : "opacity-40 pointer-events-none"}`}>
                                     <p className="text-base opacity-60 text-center mb-5">Available Streams</p>
                                     <div className="flex flex-col gap-20 md:gap-16 lg:gap-12 xl:gap-10">
                                         {
-                                            streams?.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onFocus={(focusDetails: FocusDetails) => onEpisodeFocus(focusDetails, true)} onStreamClick={() => handleStreamPlay(stream)} />)
+                                            streams?.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onFocus={(focusDetails: FocusDetails) => onEpisodeFocus(focusDetails, true)} onStreamClick={() => handleStreamPlay(stream)} authToken={authToken} />)
                                             : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
                                         }
                                     </div>
@@ -338,9 +347,11 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                     </div>
 
                     <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black -bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
-                        {/* <MediaPlayer
+                        <MediaPlayer
+                            className="h-full"
                             title={displayDetails?.title || movieDetails.info_labels?.originaltitle}
-                            src={mediaUrl.length ? "http://localhost:5000/video/"+mediaUrl : ""}
+                            // src={mediaUrl.length ? "http://localhost:5000/video/"+mediaUrl : ""}
+                            src={`${mediaUrl}.mp4`}
                             // src={[{
                             //         src: mediaUrl.length ? transformMediaUrl(mediaUrl) : "",
                             //         type: "video/mp4; codecs=avc1.42E01E, mp4a.40.2"
@@ -348,11 +359,10 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                             // ]}
                             poster={displayDetails.art.poster || ""}
                             // thumbnails="https://media-files.vidstack.io/sprite-fight/thumbnails.vtt"
-                            aspectRatio={selectedStream?.video[0].aspect || 16 / 9}
-                            crossorigin="anonymous"
+                            // aspectRatio={selectedStream?.video[0].aspect || 16 / 9}
+                            crossorigin={true}
+                            viewType="video"
                             autoplay={true}
-                            controls={true}
-                            onCanLoad={onMediaCanLoad}
                         >
                             <MediaOutlet>
                                 <MediaPoster
@@ -360,9 +370,9 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                                 />
                             </MediaOutlet>
                             <MediaCommunitySkin />
-                        </MediaPlayer> */}
+                        </MediaPlayer>
 
-                        <video
+                        {/* <video
                             id="my-video"
                             className="h-[calc(100%-10px)]"
                             controls
@@ -371,7 +381,7 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                             data-setup="{}"
                             src={mediaUrl}
                         >
-                        </video>
+                        </video> */}
                             {/* <p className="vjs-no-js">
                             To view this video please enable JavaScript, and consider upgrading to a
                             web browser that

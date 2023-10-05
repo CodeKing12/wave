@@ -209,3 +209,8 @@ export interface SeriesObj {
     _source: SeasonSource;
     sort: number[];
 }
+
+export type Info2 = {
+    title: string;
+    plot: string;
+}
