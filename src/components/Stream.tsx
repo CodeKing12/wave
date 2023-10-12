@@ -3,9 +3,9 @@ import { Barcode, Clock, Document, MessageText1, PlayCircle, Size, VolumeHigh } 
 import { StreamObj } from "./MediaTypes";
 import { FocusDetails, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 
-export default function MediaStreamOption({ stream, isEpisode, authToken, onFocus, onStreamClick }: { stream: StreamObj, isEpisode?: boolean, authToken?: string, onFocus?: (focusDetails: FocusDetails) => void, onStreamClick: () => void }) {
+export default function MediaStreamOption({ stream, isEpisode, authToken, onFocus, onStreamClick }: { stream: StreamObj, isEpisode?: boolean, authToken: string, onFocus?: (focusDetails: FocusDetails) => void, onStreamClick: (isEnterpress?: boolean) => void }) {
     const { ref, focused } = useFocusable({
-        onEnterPress: onStreamClick,
+        onEnterPress: () => onStreamClick(true),
         onFocus,
         focusable: authToken && authToken?.length ? true : false
     });

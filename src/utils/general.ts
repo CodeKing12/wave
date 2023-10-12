@@ -5,6 +5,7 @@ import { stream_p } from "./Stream";
 import { md5crypt } from "./MD5";
 import { sha1 } from "./Sha";
 import axiosInstance from "./axiosInstance";
+import Player from "video.js/dist/types/player";
 
 export function uuidv4():string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -293,3 +294,75 @@ export function resolveArtItem(list: Array<I18nInfoLabel>, key: keyof Art): stri
 
 
 // The media (Pred Marazem) (when you search for prep) doesnt have a poster 
+
+export function handleEscape(event: KeyboardEvent, callback: () => void, isComponentEscape: boolean) {
+    if (event.key === "Escape" && isComponentEscape) {
+        callback();
+    }
+}
+
+export function fullscreenShortcut(lastEnterTimestamp: number, player: Player) {
+    const currentTimestamp = Date.now();
+    const timeSinceLastEnter = currentTimestamp - lastEnterTimestamp;
+
+    if (timeSinceLastEnter < 1000) {
+    // The user pressed Enter twice within 1 second (adjust the time threshold as needed).
+        if (document.fullscreenEnabled) {
+            // Request full-screen mode
+            try {
+                if (player.isFullscreen()) {
+                    player.exitFullscreen();
+                } else {
+                    player.requestFullscreen();
+                }
+            } catch(error) {
+                console.log(error)
+            }
+        }
+
+    // Reset the timestamp to avoid multiple triggers for the same double Enter key press.
+    lastEnterTimestamp = 0;
+
+    } else {
+        // Set the timestamp of the first Enter key press.
+        lastEnterTimestamp = currentTimestamp;
+    }
+
+    return lastEnterTimestamp
+}
+
+export interface KeyTimeStamp {
+    arrowUpTimestamp: number;
+}
+
+export function handlePlayerShortcuts(event: KeyboardEvent, player: Player, keyTimestamps: KeyTimeStamp) {
+    const skipTime = 10
+
+    if (player) {
+        if (event.key === 'ArrowUp') {
+            keyTimestamps.arrowUpTimestamp = fullscreenShortcut(keyTimestamps.arrowUpTimestamp, player);
+        }
+    
+        // `enter or space` key = pause
+        if (event.keyCode === 32 || event.keyCode === 13) {
+            if (player?.paused()) {
+                player.play()
+            } else {
+                player.pause();
+            }
+        }
+        // `right` key to forward by skiptime, `left` key to rewind by skip time 
+        if (event.keyCode === 37) {
+            const currentTime = player.currentTime()
+            const newTime = currentTime && currentTime > skipTime ? currentTime - skipTime : 0
+            player.currentTime(newTime)
+        }
+    
+        if (event.keyCode === 39) {
+            const currentTime = player.currentTime()
+            const newTime = currentTime ? currentTime + skipTime : 0
+            player.currentTime(newTime)
+        }
+    }
+
+}

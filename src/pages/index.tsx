@@ -65,6 +65,7 @@ export default function Home() {
   const [selectedMedia, setSelectedMedia] = useState<MediaObj | undefined>();
   const [openModal, setOpenModal] = useState(false);
   const [finishedLoading, setFinishedLoading] = useState(false);
+  const [modalPlaceholder, setModalPlaceholder] = useState("")
 
   useEffect(() => {
     if (!openLogin && !openModal) {
@@ -216,6 +217,8 @@ export default function Home() {
   function onMediaCardClick(mediaInfo: MediaObj) {
     setOpenModal(true);
     setSelectedMedia(mediaInfo);
+    const placeholderUrl = document.getElementById(mediaInfo._id + "-poster")?.getAttribute("src");
+    setModalPlaceholder(placeholderUrl || "")
   }
 
   return (
@@ -261,7 +264,7 @@ export default function Home() {
 
       {/* <Transition> */}
         {
-          selectedMedia && openModal && <MediaModal show={openModal} media={selectedMedia || dummyMedia} authToken={authToken} onAuth={() => setOpenLogin(true)} onExit={onMediaModalClose} />
+          selectedMedia && openModal && <MediaModal show={openModal} media={selectedMedia || dummyMedia} placeholderImg={modalPlaceholder} authToken={authToken} onAuth={() => setOpenLogin(true)} onExit={onMediaModalClose} />
         }
       {/* </Transition> */}
     </main>

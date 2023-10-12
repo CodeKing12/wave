@@ -3,13 +3,14 @@ import { StreamObj } from "./MediaTypes";
 import MediaStreamOption from "./Stream";
 
 interface StreamEpisodesProps { 
+    authToken: string,
     episodeStreams: StreamObj[], 
     customFocusKey: string,
     onEpisodeStreamFocus: (focusDetails: FocusDetails) => void,
-    onEpisodeStreamClick: (stream: StreamObj) => void, 
+    onEpisodeStreamClick: (stream: StreamObj, isEnterpress?: boolean) => void, 
 }
 
-export default function StreamEpisodes({ episodeStreams, customFocusKey, onEpisodeStreamFocus, onEpisodeStreamClick }: StreamEpisodesProps) {
+export default function StreamEpisodes({ authToken, episodeStreams, customFocusKey, onEpisodeStreamFocus, onEpisodeStreamClick }: StreamEpisodesProps) {
   const { ref, focusKey, focused, hasFocusedChild } = useFocusable({
     focusKey: customFocusKey
   })
@@ -19,7 +20,7 @@ export default function StreamEpisodes({ episodeStreams, customFocusKey, onEpiso
             <div className={`flex flex-col gap-5 opacity-0 invisible -translate-y-10 duration-500 ease-in-out ${episodeStreams?.length ? "mt-5 !opacity-100 !visible !translate-y-0" : ""}`} ref={ref}>
                 {
                     episodeStreams?.length ? 
-                    episodeStreams.map((stream, index) => <MediaStreamOption key={index} stream={stream} isEpisode={true} onStreamClick={() => onEpisodeStreamClick(stream)} onFocus={onEpisodeStreamFocus} />)
+                    episodeStreams.map((stream, index) => <MediaStreamOption key={index} stream={stream} authToken={authToken} isEpisode={true} onStreamClick={(isEnterpress) => onEpisodeStreamClick(stream, isEnterpress)} onFocus={onEpisodeStreamFocus} />)
                     : ""
                 }
             </div>

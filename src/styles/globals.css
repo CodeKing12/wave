@@ -8,6 +8,10 @@
   font-family: 'Poppins', sans-serif;
 }
 
+:root {
+  --vjs-icon-height: 22px
+}
+
 #main-display {
   background-color: #191919;
 }
@@ -277,4 +281,41 @@ a, button, input {
   .media-modal .media-details, .media-modal .media-streams {
     max-width: 90%;
   }
+}
+
+video-js.video-js {
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+.video-js .vjs-current-time {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.video-js .vjs-remaining-time {
+  display: flex !important;
+  gap: 2px;
+  align-items: center;
+}
+
+.video-js .vjs-time-control {
+  @apply !text-sm
+}
+
+.vjs-button > .vjs-icon-placeholder:before {
+  font-size: var(--vjs-icon-height) !important;
+  line-height: var(--vjs-icon-height) !important;
+  height: var(--vjs-icon-height) !important;
+  top: 50% !important;
+  transform: translateY(-50%);
+}
+
+.video-js .vjs-control-bar {
+  height: 40px !important;
+}
+
+.video-js .vjs-control.vjs-button {
+  width: 50px !important;
 }

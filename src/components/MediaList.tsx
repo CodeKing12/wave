@@ -38,7 +38,7 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
                     {/* grid-cols-1 sm:grid-cols-2 */}
                         {
                             media.length ? media.map((show: MediaObj, index: number) => (
-                                <MediaCard key={index} media={show?._source} showMediaInfo={() => onCardSelect(show)} onEnterPress={() => onCardPress(show)} onFocus={onCardFocus} />
+                                <MediaCard key={show?._id} id={show?._id} media={show?._source} showMediaInfo={() => onCardSelect(show)} onEnterPress={() => onCardPress(show)} onFocus={onCardFocus} />
                             )) : "Nothing"
                         }
                     </div>

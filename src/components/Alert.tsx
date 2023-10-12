@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { TickCircle } from "iconsax-react";
+import { CloseCircle, TickCircle } from "iconsax-react";
 
 export type AlertType = "success" | "error" | "warning" | "info";
 
@@ -35,12 +35,25 @@ export default function Alert({ id, title, message, type, onRemove }: AlertProps
 
   return (
     <div
-      className={`flex gap-3 items-center px-4 py-2.5 bg-neutral-900 border-2 border-yellow-300 rounded-[40px] duration-500 ease-in-out -translate-y-[calc(100%+12px)] opacity-0 invisible ${show ? "!opacity-100 !visible !translate-y-0 z-50" : ""}`}
+      className={`flex gap-3 items-center px-4 py-2.5 bg-neutral-900 border-2 rounded-[40px] duration-500 ease-in-out -translate-y-[calc(100%+12px)] opacity-0 invisible ${show ? "!opacity-100 !visible !translate-y-0 z-[9999]" : ""} ${type === "success" ? "border-yellow-300" : type === "error" ? "border-red-500" : ""}`}
     >
       <div className="p-2 rounded-full bg-black-1 bg-neutral-800">
-        <TickCircle size="28px" variant="Bold" className="text-yellow-300" />
+        {
+          type === "success" ? (
+            <TickCircle size="28px" variant="Bold" className="text-yellow-300" />
+            ) : type === "error" ? (
+              <CloseCircle size="28px" variant="Bold" className="text-red-500" />
+            ) : ""
+        }
       </div>
-      <p className="font-medium text-gray-200">{title}</p>
+      <div className="flex flex-col gap-0.5">
+        <p className="font-medium text-gray-200">{title}</p>
+        {
+          message ? (
+            <p className="font-medium text-gray-500 text-sm">{message}</p>
+          ) : ""
+        }
+      </div>
     </div>
   );
 }

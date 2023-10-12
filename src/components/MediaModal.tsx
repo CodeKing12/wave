@@ -5,11 +5,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {MEDIA_ENDPOINT, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, proxyUrl } from "./constants";
 import Skeleton from "react-loading-skeleton";
 import { HashLoader } from "react-spinners";
-import { getMediaStreams, getStreamUrl, resolveArtItem, setWidths } from "@/utils/general";
+import { getMediaStreams, getStreamUrl, handleEscape, resolveArtItem, setWidths } from "@/utils/general";
 import 'vidstack/styles/defaults.css';
 import 'vidstack/styles/community-skin/video.css';
-import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster } from '@vidstack/react';
-import { FocusContext, FocusDetails, setFocus, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
+import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster, MediaCaptions, type MediaCaptionsProps, type MediaPlayerProps, type MediaOutletProps } from '@vidstack/react';
+import { FocusContext, FocusDetails, getCurrentFocusKey, setFocus, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 import FocusLeaf from "./FocusLeaf";
 import MediaDetails from "./MediaDetails";
 import MediaStreamOption from "./Stream";
@@ -18,11 +18,13 @@ import Season from "./Season";
 import axiosInstance from "@/utils/axiosInstance";
 import EpisodeList from "./EpisodeList";
 import Image from "next/image";
+import PlayMedia from "./PlayMedia";
 
 interface MediaModalProps {
     show: boolean;
     media: MediaObj,
     authToken: string,
+    placeholderImg: string,
     onAuth: () => void;
     onExit: () => void;
 }
@@ -40,7 +42,7 @@ export interface SeriesStreamObj {
 }
 
 
-export default function MediaModal({ show, media, authToken, onAuth, onExit }: MediaModalProps) {
+export default function MediaModal({ show, media, placeholderImg, authToken, onAuth, onExit }: MediaModalProps) {
     const displayDetails = getDisplayDetails(media._source.i18n_info_labels)
     const poster = resolveArtItem(media._source.i18n_info_labels, "poster");
     const fanart = resolveArtItem(media._source.i18n_info_labels, "fanart");
@@ -53,7 +55,7 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
     const [selectedEpisode, setSelectedEpisode] = useState();
     const [episodes, setEpisodes] = useState<SeriesData>({});
     const [selectedStream, setSelectedStream] = useState<StreamObj | undefined>();
-    const [mediaUrl, setMediaUrl] = useState("");
+    const [mediaUrl, setMediaUrl] = useState<string | undefined>("");
     const [isLoadingEpisodeStreams, setIsLoadingEpisodeStreams] = useState("");
     let { rating, voteCount } = getRatingAggr(movieDetails.ratings);
     const streamClasses = [".size", ".audio", ".subtitles", ".resolution", ".codec", ".duration"]
@@ -63,6 +65,9 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
     const subMediaRef = useRef<HTMLDivElement>(null);
     const tvMediaRef = useRef<HTMLDivElement>(null);
     const episodeListRef = useRef<HTMLDivElement>(null);
+    const [lastFocus, setLastFocus] = useState<string | undefined>("FAVE-BTN")
+    const [showPlayer, setShowPlayer] = useState(false);
+    const prevShowPlayer = useRef(false);
     
     const {
         ref,
@@ -90,8 +95,13 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
         // console.log(displayDetails);
     }, [media, selectedSeason])
 
-    function onMediaCanLoad(event: any) {
-        console.log(event)
+    function onPlayerExit() {
+        setShowPlayer(false);
+        setMediaUrl(undefined);
+        if (lastFocus) {
+            setFocus(lastFocus)
+        }
+        console.log("Focused MediaModal")
     }
 
     function transformMediaUrl(originalUrl: string) {
@@ -147,20 +157,41 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
             }
         }
         fetchModalData();
-    }, [media._id]) /* eslint-disable-line react-hooks/exhaustive-deps */
+
+        function handleModalEscape(event: KeyboardEvent) {
+            if ((event.key === "Escape" || event.keyCode === 27) && prevShowPlayer.current === showPlayer) {
+                exitModal();
+            }
+
+            prevShowPlayer.current = showPlayer
+        }
+
+        document.addEventListener("keydown", handleModalEscape)
+
+        return () => {
+            document.removeEventListener("keydown", handleModalEscape)
+        }
+    }, [media._id, mediaUrl, showPlayer]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
     useEffect(() => {
         streamClasses.forEach((streamClass) => setWidths(streamClass))
     }, [media._id, streams]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
-    async function handleStreamPlay(stream: StreamObj) {
+    async function handleStreamPlay(stream: StreamObj, isEnterpress?: boolean) {
         if (authToken.length) {
             setIsLoadingUrl(true);
             setSelectedStream(stream);
             const mediaLink = await getStreamUrl(authToken, stream);
             if (mediaLink) {
                 // console.log(mediaLink)
-                setMediaUrl(mediaLink)
+                if (isEnterpress) {
+                    setLastFocus(getCurrentFocusKey())
+                } else {
+                    setLastFocus(undefined)
+                }
+                setMediaUrl(mediaLink);
+                setShowPlayer(true);
+                prevShowPlayer.current = true
             };
             setIsLoadingUrl(false);
         } else {
@@ -263,7 +294,7 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                     <div className="poster w-full max-w-[350px] mx-auto h-[500px] xl:h-full xl:min-w-[500px] xl:w-[500px] relative bg-[#191919] rounded-[30px] bg-opacity-75">
                         {
                             poster ?
-                            <Image width={600} height={600} key={media._id} src={poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
+                            <Image width={600} height={600} key={media._id} placeholder="blur" blurDataURL={placeholderImg} src={poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
                             : <ImageIcon size={170} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
                         }
                     </div>
@@ -282,7 +313,7 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                                     <p className="text-base opacity-60 text-center mb-5">Available Streams</p>
                                     <div className="flex flex-col gap-20 md:gap-16 lg:gap-12 xl:gap-10">
                                         {
-                                            streams?.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onFocus={(focusDetails: FocusDetails) => onEpisodeFocus(focusDetails, true)} onStreamClick={() => handleStreamPlay(stream)} authToken={authToken} />)
+                                            streams?.length ? streams.map((stream, index) => <MediaStreamOption key={index} stream={stream} onFocus={(focusDetails: FocusDetails) => onEpisodeFocus(focusDetails, true)} onStreamClick={(isEnterpress?: boolean) => handleStreamPlay(stream, isEnterpress)} authToken={authToken} />)
                                             : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
                                         }
                                     </div>
@@ -320,13 +351,13 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                                                 seasons[media._id]?.length ? seasons[media._id].map((seriesMedia, index) =>
                                                     seriesMedia._source.info_labels.mediatype === "season" ?
                                                     <Season key={index} season={seriesMedia} onClick={() => {onSeasonClick(seriesMedia);setFocus("FAVE-BTN");}} isVisible={Boolean(!selectedSeason && seasons[media?._id]?.length)} onFocus={onEpisodeFocus} />
-                                                    : <Episode key={index} episode={seriesMedia} onClick={() => getEpisodeStreams(seriesMedia)} episodeStreams={episodeStreams[storeKeyRef.current]?.[seriesMedia._id]} onEpisodeStreamClick={(stream) => handleStreamPlay(stream)} isLoadingStreams={isLoadingEpisodeStreams === seriesMedia._id} onFocus={onEpisodeFocus} />
+                                                    : <Episode authToken={authToken} key={index} episode={seriesMedia} onClick={() => getEpisodeStreams(seriesMedia)} episodeStreams={episodeStreams[storeKeyRef.current]?.[seriesMedia._id]} onEpisodeStreamClick={(stream, isEnterpress) => handleStreamPlay(stream, isEnterpress)} isLoadingStreams={isLoadingEpisodeStreams === seriesMedia._id} onFocus={onEpisodeFocus} />
                                                 )
                                                 : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="mt-5 relative left-1/2 -translate-x-1/2 -translate-y-1/2" />
                                             }
                                         </div>
                                         <div className={`max-w-full absolute top-0 flex flex-col gap-10 opacity-0 invisible translate-y-16 duration-500 ease-in-out ${showEpisodes && selectedSeason && episodes[selectedSeason?._id]?.length ? "!opacity-100 !visible !translate-y-0" : ""}`} ref={episodeListRef}>
-                                            <EpisodeList episodes={episodes} selectedSeason={selectedSeason} episodeStreams={episodeStreams[storeKeyRef.current] || {}} onEpisodeClick={getEpisodeStreams} onEpisodeStreamClick={(stream) => handleStreamPlay(stream)} isLoadingEpisodeStreams={isLoadingEpisodeStreams} onEpisodeFocus={onEpisodeFocus} onEpisodeStreamFocus={onEpisodeFocus} isFocusable={Boolean(showEpisodes && selectedSeason)} />
+                                            <EpisodeList authToken={authToken} episodes={episodes} selectedSeason={selectedSeason} episodeStreams={episodeStreams[storeKeyRef.current] || {}} onEpisodeClick={getEpisodeStreams} onEpisodeStreamClick={(stream, isEnterpress) => handleStreamPlay(stream, isEnterpress)} isLoadingEpisodeStreams={isLoadingEpisodeStreams} onEpisodeFocus={onEpisodeFocus} onEpisodeStreamFocus={onEpisodeFocus} isFocusable={Boolean(showEpisodes && selectedSeason)} />
                                             {/* <div className="flex flex-col gap-4 flex-wrap max-w-full">
                                                 {
                                                     episodes[selectedSeason?._id || ""]?.map((episode, index) => <Episode key={index} episode={episode} onClick={() => getEpisodeStreams(episode)} episodeStreams={episodeStreams[storeKeyRef.current]?.[episode?._id] || undefined} onEpisodeStreamClick={(stream) => handleStreamPlay(stream)} isLoadingStreams={isLoadingEpisodeStreams === episode?._id} />)
@@ -346,56 +377,9 @@ export default function MediaModal({ show, media, authToken, onAuth, onExit }: M
                         <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={isLoadingUrl} />
                     </div>
 
-                    <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black -bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""}`}>
-                        <MediaPlayer
-                            className="h-full"
-                            title={displayDetails?.title || movieDetails.info_labels?.originaltitle}
-                            // src={mediaUrl.length ? "http://localhost:5000/video/"+mediaUrl : ""}
-                            src={`${mediaUrl}.mp4`}
-                            // src={[{
-                            //         src: mediaUrl.length ? transformMediaUrl(mediaUrl) : "",
-                            //         type: "video/mp4; codecs=avc1.42E01E, mp4a.40.2"
-                            //     }
-                            // ]}
-                            poster={displayDetails.art.poster || ""}
-                            // thumbnails="https://media-files.vidstack.io/sprite-fight/thumbnails.vtt"
-                            // aspectRatio={selectedStream?.video[0].aspect || 16 / 9}
-                            crossorigin={true}
-                            viewType="video"
-                            autoplay={true}
-                        >
-                            <MediaOutlet>
-                                <MediaPoster
-                                    alt={displayDetails?.plot}
-                                />
-                            </MediaOutlet>
-                            <MediaCommunitySkin />
-                        </MediaPlayer>
-
-                        {/* <video
-                            id="my-video"
-                            className="h-[calc(100%-10px)]"
-                            controls
-                            preload="auto"
-                            width="100%"
-                            data-setup="{}"
-                            src={mediaUrl}
-                        >
-                        </video> */}
-                            {/* <p className="vjs-no-js">
-                            To view this video please enable JavaScript, and consider upgrading to a
-                            web browser that
-                                <a href="https://videojs.com/html5-video-support/" target="_blank">
-                                    supports HTML5 video
-                                </a>
-                        </p> */}
-
-                        <FocusLeaf focusedStyles="[&>button]:!bg-black-1 [&>button]:!text-yellow-300 [&>button]:!border-yellow-300" isFocusable={Boolean(mediaUrl.length)} onEnterPress={() => setMediaUrl("")}>
-                            <button className="w-10 h-10 bg-yellow-300 border-[3px] border-transparent absolute top-0 right-0 z-[99999] flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 hover:border-yellow-300" onClick={() => setMediaUrl("")}>
-                                <Back variant="Bold" />
-                            </button>
-                        </FocusLeaf>
-                    </div>
+                    {
+                        mediaUrl && <PlayMedia show={showPlayer} mediaUrl={mediaUrl} mediaFormat="mp4" mediaType="video/mp4" onExit={onPlayerExit} />
+                    }
                 </div>
             </div>
         </FocusContext.Provider>

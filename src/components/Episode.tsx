@@ -9,16 +9,17 @@ import { FocusDetails, setFocus, useFocusable } from "@noriginmedia/norigin-spat
 import StreamEpisodes from "./StreamEpisodes";
 
 export interface EpisodeProps {
+    authToken: string;
     episode: SeriesObj;
     episodeStreams: StreamObj[];
     isLoadingStreams: boolean;
     onFocus: ({ y }: { y: number }) => void;
     onClick: () => void;
     onEpisodeStreamFocus?: (focusDetails: FocusDetails) => void;
-    onEpisodeStreamClick: (stream: StreamObj) => void;
+    onEpisodeStreamClick: (stream: StreamObj, isEnterpress?: boolean) => void;
 }
 
-export default function Episode({ episode, onClick, episodeStreams, isLoadingStreams, onFocus, onEpisodeStreamFocus, onEpisodeStreamClick }: EpisodeProps) {
+export default function Episode({ authToken, episode, onClick, episodeStreams, isLoadingStreams, onFocus, onEpisodeStreamFocus, onEpisodeStreamClick }: EpisodeProps) {
     const episodeDetails = getDisplayDetails(episode._source.i18n_info_labels);
     const hasNoStreams = Array.isArray(episodeStreams) && !episodeStreams?.length;
     const [showStreams, setShowStreams] = useState(false);
@@ -109,7 +110,7 @@ export default function Episode({ episode, onClick, episodeStreams, isLoadingStr
                 </button>
             </article>
 
-            <StreamEpisodes episodeStreams={episodeStreams} onEpisodeStreamClick={onEpisodeStreamClick} customFocusKey={episode._id} onEpisodeStreamFocus={modifyStreamOffset} />
+            <StreamEpisodes authToken={authToken} episodeStreams={episodeStreams} onEpisodeStreamClick={onEpisodeStreamClick} customFocusKey={episode._id} onEpisodeStreamFocus={modifyStreamOffset} />
 
             <div className={`h-0 duration-300 ease-linear ${hasNoStreams ? "h-6 remove-element" : ""}`}>
                 {
