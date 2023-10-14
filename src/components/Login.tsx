@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { memo, useState, useEffect } from "react";
 import { CloseCircle, Login as LoginIcon } from "iconsax-react";
 import { AUTH_ENDPOINT, PATH_LOGIN, PATH_SALT, authAxiosConfig } from "./constants";
 import { sha1 } from "@/utils/Sha";
@@ -17,7 +17,23 @@ interface LoginProps {
 }
 
 
-export default function Login({ show, onLogin, onClose }: LoginProps) {
+const Login = memo(function Login({ show, onLogin, onClose }: LoginProps) {
+    console.log("Login is Re-rendering")
+
+    useEffect(() => {
+        function handleLoginEscape(event: KeyboardEvent) {
+            if (event.code === "Escape" || event.keyCode === 27) {
+                onClose();
+            }
+        }
+
+        document.addEventListener("keydown", handleLoginEscape)
+
+        return () => {
+            document.removeEventListener("keydown", handleLoginEscape)
+        }
+    }, [onClose])
+
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -139,4 +155,6 @@ export default function Login({ show, onLogin, onClose }: LoginProps) {
             </div>
         </FocusContext.Provider>
     )
-}
+})
+
+export default Login

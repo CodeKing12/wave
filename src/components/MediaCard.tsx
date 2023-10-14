@@ -1,10 +1,17 @@
 import { Heart, Star1, Image as ImageIcon } from "iconsax-react";
-import { I18nInfoLabel, RatingObj } from "./MediaTypes";
-import { useFocusable } from "@noriginmedia/norigin-spatial-navigation";
+import { I18nInfoLabel, MediaObj, MediaSource, RatingObj } from "./MediaTypes";
+import { FocusableComponentLayout, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 import Image from "next/image";
 import { resolveArtItem, smallPoster } from "@/utils/general";
-import { useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 
+export interface MediaCardProps {
+    id: string,
+    media: MediaObj,
+    showMediaInfo: (mediaInfo: MediaObj) => void,
+    onEnterPress: (mediaInfo: MediaObj) => void;
+    onFocus: (focusDetails: FocusableComponentLayout) => void;
+}
 
 export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
     let selectedDetails;
@@ -52,15 +59,17 @@ export function getRatingAggr(ratings: RatingObj) {
     return { rating: aggrRating, voteCount };
 }
 
-export default function MediaCard({ id, media, showMediaInfo, onEnterPress, onFocus }: any) {
+const MediaCard = memo(function MediaCard({ id, media, showMediaInfo, onEnterPress, onFocus }: MediaCardProps) {
+    console.log("MediaCard is re-rendering")
     let genres: string;
-    let { rating, voteCount } = getRatingAggr(media?.ratings);
-    const premiere_date = new Date(media.info_labels?.premiered);
-    const poster = resolveArtItem(media.i18n_info_labels, "poster");
+    const mediaSource = media?._source
+    let { rating, voteCount } = getRatingAggr(mediaSource?.ratings);
+    const premiere_date = new Date(mediaSource.info_labels?.premiered);
+    const poster = resolveArtItem(mediaSource.i18n_info_labels, "poster");
     const [posterLink, setPosterLink] = useState(smallPoster(poster))
-    let displayDetails = getDisplayDetails(media.i18n_info_labels);
+    let displayDetails = getDisplayDetails(mediaSource.i18n_info_labels);
     const { ref, focused } = useFocusable({
-        onEnterPress,
+        onEnterPress: () => onEnterPress(media),
         onFocus
     });
 
@@ -68,16 +77,37 @@ export default function MediaCard({ id, media, showMediaInfo, onEnterPress, onFo
         setPosterLink(smallPoster(poster, true))
     }
 
+    const renderStars = useCallback(() => {
+        const filledIcons = Array(Math.round(rating)).fill("").map((value, index) => {
+            return (
+                <Star1 className="fill-yellow-300 text-yellow-300" key={index} size={18} />
+            )
+        })
+
+        const emptyIcons = Array(5 - Math.round(rating)).fill("").map((value, index) => {
+            return (
+                <Star1 className="fill-gray-300 text-gray-300 opacity-90" key={index+5} size={18} />
+            )
+        })
+
+        return filledIcons.concat(emptyIcons)
+        
+    }, [rating])
+
+    const starRatings = useMemo(() => {
+        return renderStars()
+    }, [renderStars])
+
     // if (!displayDetails) {
     //     if (media && media.i18n_info_labels) {
     //         displayDetails = media.i18n_info_labels[media.i18n_info_labels?.length - 1]
     //     }
     // }
 
-    if (media?.info_labels?.genre.length > 1) {
-        genres = media?.info_labels.genre[0] + "/" + media.info_labels.genre[1]
+    if (mediaSource?.info_labels?.genre.length > 1) {
+        genres = mediaSource?.info_labels.genre[0] + "/" + mediaSource.info_labels.genre[1]
     } else {
-        genres = media?.info_labels?.genre[0]
+        genres = mediaSource?.info_labels?.genre[0]
     }
 
     return (
@@ -91,30 +121,17 @@ export default function MediaCard({ id, media, showMediaInfo, onEnterPress, onFo
             : <ImageIcon size={85} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
             /* eslint-enable @next/next/no-img-element */
         }
-        <div className={`w-full h-full absolute bottom-0 py-5 px-3 text-gray-100 bg-black bg-opacity-80 rounded-[11px] opacity-0 group-hover:opacity-100 invisible group-hover:visible ease-in-out duration-[400ms] ${focused ? "!duration-300 !visible !opacity-100" : ""}`} onClick={() => showMediaInfo(true)}>
+        <div className={`w-full h-full absolute bottom-0 py-5 px-3 text-gray-100 bg-black bg-opacity-80 rounded-[11px] opacity-0 group-hover:opacity-100 invisible group-hover:visible ease-in-out duration-[400ms] ${focused ? "!duration-300 !visible !opacity-100" : ""}`} onClick={() => showMediaInfo(media)}>
             <div className="flex flex-col justify-between h-full">
                 <div>
-                    <h5 className="text-[15px] sm:text-base lg:text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ displayDetails?.title || media.info_labels?.originaltitle }</h5>
+                    <h5 className="text-[15px] sm:text-base lg:text-[17px] font-medium mb-1 group-hover:text-yellow-300 duration-300 ease-linear">{ displayDetails?.title || mediaSource.info_labels?.originaltitle }</h5>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                         <p className="text-sm text-gray-400">{genres}</p>
                         <p className="text-sm text-gray-400 text-opacity-80">{premiere_date.getFullYear() || ""}</p>
                     </div>
                     <div className="flex items-center justify-between mt-2">
                         <div className="flex gap-0.5 scale-90 sm:scale-100">
-                            {
-                                Array(Math.round(rating)).fill("").map((value, index) => {
-                                    return (
-                                        <Star1 className="fill-yellow-300 text-yellow-300" key={index} size={18} />
-                                    )
-                                })
-                            }
-                            {
-                                Array(5 - Math.round(rating)).fill("").map((value, index) => {
-                                    return (
-                                        <Star1 className="fill-gray-300 text-gray-300 opacity-90" key={index} size={18} />
-                                    )
-                                })
-                            }
+                            {starRatings}
                         </div>
                         <p className="text-sm text-gray-300 text-opacity-70 font-medium leading-normal">({ voteCount })</p>
                     </div>
@@ -132,4 +149,6 @@ export default function MediaCard({ id, media, showMediaInfo, onEnterPress, onFo
         </div>
       </div>
     )
-  }
+})
+
+  export default MediaCard

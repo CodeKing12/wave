@@ -13,7 +13,7 @@ export interface VideoPlayerProps {
 
 export const VideoJS = ({options, onReady, quitPlayer}: VideoPlayerProps) => {
 //   const ref = React.useRef(null);
-  const playerRef = React.useRef(null);
+  const playerRef = React.useRef<Player | null>(null);
   const { ref, focused, focusSelf } = useFocusable();
 
   React.useEffect(() => {
@@ -34,6 +34,7 @@ export const VideoJS = ({options, onReady, quitPlayer}: VideoPlayerProps) => {
         userActions: {
             hotkeys: function(event: KeyboardEvent) {
               // `this` is the player in this context
+              console.log("Hotkey,", event.key, event.keyCode)
               handlePlayerShortcuts(event, player, keyTimestamps)
             }
         }

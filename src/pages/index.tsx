@@ -1,7 +1,7 @@
 import Sidebar, { PageType } from '@/components/Sidebar'
 import { SearchNormal1, ArrowLeft, ArrowRight, SearchNormal } from "iconsax-react"
 import { MEDIA_ENDPOINT, PATH_ANIMATED_MOVIES, PATH_ANIMATED_SERIES, PATH_CONCERTS, PATH_FAIRY_TALES, PATH_MOVIES, PATH_MOVIES_CZSK, PATH_SEARCH_MEDIA, PATH_SERIES, PATH_SERIES_CZSK, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE } from '@/components/constants';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import MediaList from '@/components/MediaList';
 // import { BeatLoader, BounceLoader, ClipLoader, ClockLoader, ClimbingBoxLoader, FadeLoader, GridLoader, PuffLoader, PulseLoader, PropagateLoader, RingLoader, SquareLoader, SkewLoader, ScaleLoader, HashLoader, SyncLoader, RotateLoader } from 'react-spinners';
 import { HashLoader } from 'react-spinners';
@@ -61,11 +61,12 @@ export default function Home() {
   const prevPagination = useRef(pagination);
   const [query, setQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<String[]>([]);
-  const { ref, focusKey, hasFocusedChild, focusSelf } = useFocusable({trackChildren: true, forceFocus: true})
+  const { ref, focusKey, hasFocusedChild, focusSelf } = useFocusable({forceFocus: true})
   const [selectedMedia, setSelectedMedia] = useState<MediaObj | undefined>();
   const [openModal, setOpenModal] = useState(false);
   const [finishedLoading, setFinishedLoading] = useState(false);
-  const [modalPlaceholder, setModalPlaceholder] = useState("")
+  const [modalPlaceholder, setModalPlaceholder] = useState("");
+  // const [keyInput, setKeyInput] = useState<any[]>([])
 
   useEffect(() => {
     if (!openLogin && !openModal) {
@@ -100,6 +101,12 @@ export default function Home() {
       setHideSidebar(true);
     }
     setFinishedLoading(true)
+
+    // function displayInputs(event: KeyboardEvent) {
+    //   setKeyInput([event.code, event.keyCode, event.key, event.which])
+    // }
+  
+    // document.addEventListener("keydown", displayInputs)
   }, []);
   
   const mediaPerPage = 100
@@ -117,13 +124,13 @@ export default function Home() {
     search: PATH_SEARCH_MEDIA
   }
 
-  function updatePagination(page: PageType, increment?: number) {
+  const updatePagination = useCallback((page: PageType, increment?: number) => {
     const prevPageValue = pagination[page] || 0
     setPagination((prevPagination) => ({
       ...prevPagination,
       [page]: increment ? prevPageValue + increment : 0
     }))
-  }
+  }, [pagination])
 // Modify the media or search_page storage to store based on search terms 
   useEffect(() => {
     const isSearch = searchHistory[searchHistory.length - 1] === query
@@ -164,7 +171,7 @@ export default function Home() {
     prevPagination.current = pagination;
   }, [page, pagination, searchHistory]) /* eslint-disable-line react-hooks/exhaustive-deps */
 
-  function searchMedia() {
+  const searchMedia = useCallback(() => {
     if (query.length && query !== searchHistory[searchHistory.length - 1]) {
       setSearchHistory([...searchHistory, query]);
       updatePagination("search");
@@ -175,9 +182,9 @@ export default function Home() {
     } else if (!query.length) {
       setPage("movies")
     }
-  }
+  }, [query, searchHistory, page, updatePagination])
 
-  function logOutWebshare() {
+  const logoutWebshare = useCallback(() => {
     setAuthToken("");
     setIsAuthenticated(false);
     localStorage.removeItem("authToken");
@@ -185,9 +192,9 @@ export default function Home() {
       type: "success",
       title: "Logout Successful"
     })
-  }
+  }, [addAlert])
 
-  function onLogin(isSuccess: boolean, token: string) {
+  const onLogin = useCallback((isSuccess: boolean, token: string) => {
     setIsAuthenticated(isSuccess);
     setAuthToken(token);
     setOpenLogin(false);
@@ -195,7 +202,7 @@ export default function Home() {
       type: "success",
       title: "Authentication Successful"
     })
-  }
+  }, [addAlert])
 
   const mainRef = useRef<HTMLElement | null>(null);
 
@@ -210,29 +217,41 @@ export default function Home() {
       }, [mainRef]
   );
 
-  function onMediaModalClose() {
-      setOpenModal(false);
-  }
+  const onMediaModalClose = useCallback(() => setOpenModal(false), []);
 
-  function onMediaCardClick(mediaInfo: MediaObj) {
+  const onMediaCardClick = useCallback((mediaInfo: MediaObj) => {
     setOpenModal(true);
     setSelectedMedia(mediaInfo);
     const placeholderUrl = document.getElementById(mediaInfo._id + "-poster")?.getAttribute("src");
     setModalPlaceholder(placeholderUrl || "")
-  }
+  }, [])
+
+  const navUpdateQuery = useCallback((query: string) => setQuery(query), [])
+  const navShowFavorites = useCallback(() => console.log("Clicked Favorites"), [])
+  const hideSidebarHandler = useCallback((isHidden: boolean) => setHideSidebar(isHidden), [])
+  const openLoginHandler = useCallback(() => setOpenLogin(true), [])
+  const closeLoginHandler = useCallback(() => setOpenLogin(false), [])
+  const sbLogoutHandler = useCallback(() => logoutWebshare(), [logoutWebshare])
+  const pageChangeHandler = useCallback((newPage: PageType) => setPage(newPage), [])
+
+  const getPageMedia = useMemo(() => {
+    return media[page]?.[pagination[page]] || []
+  }, [media, page, pagination])
+
 
   return (
     <main className="bg-[#191919]">
-      <Sidebar current={page} onChange={setPage} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={setHideSidebar} onLogout={logOutWebshare} finishedLoading={finishedLoading} onLoginClick={() => setOpenLogin(true)} />
+      {/* <div className="fixed top-1 left-1/2 z-[10000] text-white">Keys: { keyInput.map((val, index) => (<span className='text-yellow-300 mr-2' key={index}>{ val }</span>)) }</div> */}
+      <Sidebar current={page} onChange={pageChangeHandler} isHidden={hideSidebar} isLoggedIn={isAuthenticated} onHide={hideSidebarHandler} onLogout={sbLogoutHandler} finishedLoading={finishedLoading} onLoginClick={openLoginHandler} />
 
       <FocusContext.Provider value={focusKey}>
         <section className={`flex-1 min-h-screen lg:ml-[300px] flex flex-col pt-10 pb-16 px-3 xs:px-4 xsm:px-8 md:px-14 xl:px-16 xxl:px-[72px] font-poppins duration-500 ease-in-out h-screen overflow-auto ${hideSidebar ? "!ml-0" : ""}`} id="main-display" ref={mainRef}>
-          <Navbar query={query} updateQuery={setQuery} onSearch={searchMedia} showFavorites={() => console.log("Clicked Favorites")} />
+          <Navbar query={query} updateQuery={navUpdateQuery} onSearch={searchMedia} showFavorites={navShowFavorites} />
           
           <div className={`relative flex-1 mt-6 ${hasFocusedChild ? 'menu-expanded' : 'menu-collapsed'}`} ref={ref}>
             {
               media[page] && media[page]?.[pagination[page]]?.length ? 
-              <MediaList isAuthenticated={isAuthenticated} authToken={authToken} onMovieSelect={() => setOpenLogin(true)} page={page} media={media[page]?.[pagination[page]]} onCardFocus={onCardFocus} onMediaModalOpen={onMediaCardClick} isSidebarOpen={hideSidebar} />
+              <MediaList media={getPageMedia} onCardFocus={onCardFocus} onMediaModalOpen={onMediaCardClick} isSidebarOpen={hideSidebar} />
               : <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={true} className="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
             }
           </div>
@@ -260,11 +279,12 @@ export default function Home() {
         </section>
       </FocusContext.Provider>
 
-      <Login show={openLogin && !isAuthenticated} onLogin={onLogin} onClose={() => setOpenLogin(false)} />
+      <Login show={openLogin && !isAuthenticated} onLogin={onLogin} onClose={closeLoginHandler} />
 
       {/* <Transition> */}
         {
-          selectedMedia && openModal && <MediaModal show={openModal} media={selectedMedia || dummyMedia} placeholderImg={modalPlaceholder} authToken={authToken} onAuth={() => setOpenLogin(true)} onExit={onMediaModalClose} />
+          // selectedMedia && openModal && <MediaModal show={openModal} media={selectedMedia || dummyMedia} placeholderImg={modalPlaceholder} authToken={authToken} onAuth={() => setOpenLogin(true)} onExit={onMediaModalClose} />
+          <MediaModal show={openModal} media={selectedMedia || dummyMedia} placeholderImg={modalPlaceholder} authToken={authToken} onAuth={openLoginHandler} onExit={onMediaModalClose} />
         }
       {/* </Transition> */}
     </main>

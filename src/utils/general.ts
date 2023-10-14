@@ -296,7 +296,7 @@ export function resolveArtItem(list: Array<I18nInfoLabel>, key: keyof Art): stri
 // The media (Pred Marazem) (when you search for prep) doesnt have a poster 
 
 export function handleEscape(event: KeyboardEvent, callback: () => void, isComponentEscape: boolean) {
-    if (event.key === "Escape" && isComponentEscape) {
+    if (event.code === "Escape" && isComponentEscape) {
         callback();
     }
 }

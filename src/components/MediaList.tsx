@@ -1,25 +1,28 @@
+import { memo } from "react";
 import MediaCard from "./MediaCard";
 import MediaModal from "./MediaModal";
 import { MediaObj } from "./MediaTypes";
 import { useState, useCallback } from "react";
 import Transition from "./Transition";
-import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
+import { useFocusable, FocusContext, FocusDetails, FocusableComponentLayout } from "@noriginmedia/norigin-spatial-navigation";
 
-export default function MediaList({ media, isAuthenticated, authToken, onMovieSelect, onCardFocus, onMediaModalOpen, isModalOpen, isSidebarOpen }: any) {
+export interface MediaListProps {
+    media?: MediaObj[],
+    isModalOpen?: boolean,
+    isSidebarOpen: boolean,
+    onCardFocus: (focusDetails: FocusableComponentLayout) => void,
+    onMediaModalOpen: (mediaInfo: MediaObj) => void,
+}
+
+const MediaList = memo(function MediaList({ media, onCardFocus, onMediaModalOpen, isModalOpen, isSidebarOpen }: MediaListProps) {
     // const { ref, focusKey, hasFocusedChild } = useFocusable()
 
-    const displayMediaInfo = useCallback(
-        (mediaInfo: MediaObj) => {
-            // setSelectedMedia(mediaInfo);
-            onMediaModalOpen(mediaInfo);
-        }, [onMediaModalOpen]
-    )
-
+    console.log("MediaList is re-rendering")
     const onCardSelect = useCallback(
         (mediaInfo: MediaObj) => {
             // isAuthenticated ? displayMediaInfo(mediaInfo) : onMovieSelect(true)
-            displayMediaInfo(mediaInfo)
-        }, [displayMediaInfo]
+            onMediaModalOpen(mediaInfo);
+        }, [onMediaModalOpen]
     )
 
     const onCardPress = useCallback((mediaInfo: MediaObj) => {
@@ -37,8 +40,8 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
                     <div id="media-list" className={`grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-center flex-wrap gap-y-4 gap-x-1 md:gap-x-2 ${isModalOpen ? "!overflow-hidden" : ""} ${isSidebarOpen ? "lg:!grid-cols-4 xl:!grid-cols-5 2xl:!grid-cols-6" : "listIsHidden"}`}>
                     {/* grid-cols-1 sm:grid-cols-2 */}
                         {
-                            media.length ? media.map((show: MediaObj, index: number) => (
-                                <MediaCard key={show?._id} id={show?._id} media={show?._source} showMediaInfo={() => onCardSelect(show)} onEnterPress={() => onCardPress(show)} onFocus={onCardFocus} />
+                            media && media.length ? media.map((show: MediaObj, index: number) => (
+                                <MediaCard key={show?._id} id={show?._id} media={show} showMediaInfo={onCardSelect} onEnterPress={onCardPress} onFocus={onCardFocus} />
                             )) : "Nothing"
                         }
                     </div>
@@ -54,4 +57,6 @@ export default function MediaList({ media, isAuthenticated, authToken, onMovieSe
             } */}
         </>
     )
-} 
+})
+
+export default MediaList;

@@ -5,10 +5,11 @@ import { Back } from "iconsax-react";
 import videojs from "video.js";
 import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 import { fullscreenShortcut, handleEscape, handlePlayerShortcuts } from "@/utils/general";
+import Player from "video.js/dist/types/player";
 
 export interface PlayMediaProps {
     show: boolean,
-    mediaUrl: string,
+    mediaUrl?: string,
     mediaFormat: string,
     mediaType: string,
     onExit: () => void;
@@ -24,13 +25,16 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
     } = useFocusable({
         trackChildren: true,
         isFocusBoundary: true,
-        focusable: Boolean(mediaUrl.length),
+        focusable: Boolean(mediaUrl?.length),
         // focusBoundaryDirections: ["left", "right"]
     });
-    const playerRef = useRef(null);
+    const playerRef = useRef<Player | null>(null);
 
     useEffect(() => {
-        if (mediaUrl.length) {
+        if (!show && !mediaUrl) {
+            playerRef.current?.dispose()
+        }
+        if (mediaUrl?.length) {
             // console.log("Focused Myself")
             focusSelf();
         }
@@ -41,7 +45,7 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
 
         function playerShortcuts(event: KeyboardEvent) {
             if (show) {
-                if (event.key === "Escape" || event.keyCode === 27) {
+                if (event.code === "Escape" || event.keyCode === 27) {
                     onExit();
                 }    
     
@@ -64,7 +68,7 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
         responsive: true,
         // fluid: true,
         sources: [{
-        src: mediaUrl.length ? `${mediaUrl}.${mediaFormat}` : undefined,
+        src: mediaUrl?.length ? `${mediaUrl}.${mediaFormat}` : undefined,
         type: mediaType
         }],
         html5: {
@@ -98,7 +102,7 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black -bg-opacity-90 ${mediaUrl.length ? "!visible !opacity-100" : ""} ${focused ? "player-is-focused" : "naa-not-focused"}`} ref={ref}>
+            <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black -bg-opacity-90 ${mediaUrl?.length ? "!visible !opacity-100" : ""} ${focused ? "player-is-focused" : "naa-not-focused"}`} ref={ref}>
                 {/* <MediaPlayer
                     className="h-full"
                     title={displayDetails?.title || movieDetails.info_labels?.originaltitle}
@@ -145,7 +149,7 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
                         </a>
                 </p> */}
 
-                <FocusLeaf className="absolute top-0 right-0 z-[99999]" focusedStyles="[&>button]:!bg-black-1 [&>button]:!text-yellow-300 [&>button]:!border-yellow-300" isFocusable={Boolean(mediaUrl.length)} onEnterPress={onExit}>
+                <FocusLeaf className="quitPlayer absolute top-0 right-0 z-[99999]" focusedStyles="[&>button]:!bg-black-1 [&>button]:!text-yellow-300 [&>button]:!border-yellow-300" isFocusable={Boolean(mediaUrl?.length)} onEnterPress={onExit}>
                     <button className="w-10 h-10 bg-yellow-300 border-[3px] border-transparent flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 hover:border-yellow-300" onClick={onExit}>
                         <Back variant="Bold" />
                     </button>

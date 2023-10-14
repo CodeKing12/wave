@@ -142,7 +142,7 @@ export interface Person {
     order: number;
 };
 
-export interface ApiSource {
+export interface MediaSource {
     original_language: string;
     languages: string[];
     networks: string[];
@@ -163,7 +163,7 @@ export interface MediaObj {
     _index: string;
     _id: string;
     _score: null;
-    _source: ApiSource;
+    _source: MediaSource;
     _streams?: StreamObj[];
     sort: number[];
 }

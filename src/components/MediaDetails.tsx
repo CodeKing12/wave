@@ -1,5 +1,5 @@
 import { convertSecondsToTime, formatDate } from "@/utils/general";
-import { ApiSource, I18nInfoLabel } from "./MediaTypes";
+import { MediaSource, I18nInfoLabel } from "./MediaTypes";
 import FocusLeaf from "./FocusLeaf";
 import { Star1 } from "iconsax-react";
 import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
@@ -7,7 +7,7 @@ import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-naviga
 export interface MediaDetailsProps {
     movieTitle: string,
     displayDetails: I18nInfoLabel,
-    movieDetails: ApiSource,
+    movieDetails: MediaSource,
     rating: number,
     voteCount: number,
     onFocus: ({ y }: {y: number}) => void;

@@ -1,5 +1,5 @@
 import { AlertData, AlertInfo } from '@/components/Alert';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 
 interface AlertContextValues {
     alerts: AlertInfo[],
@@ -22,19 +22,19 @@ export const useAlert = () => {
 export default function AlertProvider({ children }: { children: ReactNode }) {
   const [alerts, setAlerts] = useState<AlertInfo[]>([]);
 
-  const addAlert = (alert: AlertData) => {
+  const addAlert = useCallback((alert: AlertData) => {
     setAlerts((prevAlerts) => [...prevAlerts, { ...alert, id: prevAlerts.length }]);
-  };
+  }, []);
 
-  const removeAlert = (id: number) => {
+  const removeAlert = useCallback((id: number) => {
     setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert.id !== id));
-  };
+  }, []);
 
-  const contextValues: AlertContextValues = {
+  const contextValues: AlertContextValues = useMemo(() => ({
     alerts,
     addAlert,
     removeAlert,
-  };
+  }), [alerts, addAlert, removeAlert]);
 
   return (
     <AlertContext.Provider value={contextValues}>

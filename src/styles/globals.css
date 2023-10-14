@@ -319,3 +319,8 @@ video-js.video-js {
 .video-js .vjs-control.vjs-button {
   width: 50px !important;
 }
+
+.quitPlayer.inactive {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}

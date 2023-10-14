@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
 import { Video, VideoVertical, MusicCircle, MagicStar, VideoOctagon, Magicpen, UserTag, Slider, ArrowLeft2, ArrowRight2, SidebarLeft, SidebarRight, Logout } from "iconsax-react"
 import { ReactNode, useEffect } from "react"
@@ -26,7 +27,8 @@ interface SidebarProps {
     onLogout: () => void,
 }
 
-function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
+const NavItem = memo(function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
+    console.log("Nav Item is re-rendering")
     const { ref, focused } = useFocusable({onEnterPress: () => onItemClick(page)});
 
     return (
@@ -39,9 +41,10 @@ function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
             <span>{ text }</span>
         </a>
     )
-}
+})
 
-export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn, onHide, onChange, onLogout, onLoginClick }: SidebarProps) {
+const Sidebar = memo(function Sidebar({ current, finishedLoading, isHidden, isLoggedIn, onHide, onChange, onLogout, onLoginClick }: SidebarProps) {
+    console.log("Sidebar is re-rendering")
     const {
         ref,
         focusSelf,
@@ -55,7 +58,6 @@ export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn
         // getCurrentFocusKey -- to get the current focus key
     } = useFocusable({
         focusable: !isHidden,
-        trackChildren: true,
         autoRestoreFocus: true,
         onArrowPress: () => true,
     });
@@ -112,4 +114,6 @@ export default function Sidebar({ current, finishedLoading, isHidden, isLoggedIn
             </aside>
         // </FocusContext.Provider>
     )
-}
+})
+
+export default Sidebar

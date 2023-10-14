@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
 import FocusLeaf from "./FocusLeaf";
 import { SearchNormal, SearchNormal1 } from "iconsax-react";
@@ -8,8 +9,9 @@ interface NavProps {
     onSearch: () => void;
     showFavorites: () => void;
 }
-
-export default function Navbar({ query, updateQuery, onSearch, showFavorites }: NavProps) {
+ 
+const Navbar = memo(function Navbar({ query, updateQuery, onSearch, showFavorites }: NavProps) {
+    console.log("Navbar is re-rendering")
     const { ref, focusKey, focused, hasFocusedChild } = useFocusable()
   
     return (
@@ -36,4 +38,6 @@ export default function Navbar({ query, updateQuery, onSearch, showFavorites }: 
         </nav>
       </FocusContext.Provider>
     )
-}
+})
+
+export default Navbar

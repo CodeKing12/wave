@@ -1,7 +1,7 @@
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
 import { MediaObj, SeriesObj, StreamObj } from "./MediaTypes";
 import { Back, HeartAdd, Image as ImageIcon, Backward } from "iconsax-react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { memo, useState, useEffect, useRef, useCallback } from "react";
 import {MEDIA_ENDPOINT, TOKEN_PARAM_NAME, TOKEN_PARAM_VALUE, proxyUrl } from "./constants";
 import Skeleton from "react-loading-skeleton";
 import { HashLoader } from "react-spinners";
@@ -42,7 +42,9 @@ export interface SeriesStreamObj {
 }
 
 
-export default function MediaModal({ show, media, placeholderImg, authToken, onAuth, onExit }: MediaModalProps) {
+const MediaModal = memo(function MediaModal({ show, media, placeholderImg, authToken, onAuth, onExit }: MediaModalProps) {
+    console.log("MediaModal is re-rendering")
+
     const displayDetails = getDisplayDetails(media._source.i18n_info_labels)
     const poster = resolveArtItem(media._source.i18n_info_labels, "poster");
     const fanart = resolveArtItem(media._source.i18n_info_labels, "fanart");
@@ -75,7 +77,6 @@ export default function MediaModal({ show, media, placeholderImg, authToken, onA
         hasFocusedChild,
         focusKey,
     } = useFocusable({
-        trackChildren: true,
         autoRestoreFocus: true,
         isFocusBoundary: true,
         focusable: show,
@@ -159,7 +160,7 @@ export default function MediaModal({ show, media, placeholderImg, authToken, onA
         fetchModalData();
 
         function handleModalEscape(event: KeyboardEvent) {
-            if ((event.key === "Escape" || event.keyCode === 27) && prevShowPlayer.current === showPlayer) {
+            if ((event.code === "Escape" || event.keyCode === 27) && prevShowPlayer.current === showPlayer) {
                 exitModal();
             }
 
@@ -284,7 +285,7 @@ export default function MediaModal({ show, media, placeholderImg, authToken, onA
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className={`media-modal fixed top-0 bottom-0 left-0 right-0 w-full h-full py-16 px-5 xs:px-7 xsm:px-10 md:px-16 lg:px-20 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 z-0 overflow-y-scroll xl:overflow-hidden ${show ? "!translate-x-0 !opacity-100 !visible !z-[200]" : ""}`}>
+            <div className={`media-modal fixed top-0 bottom-0 left-0 right-0 w-screen h-screen py-16 px-5 xs:px-7 xsm:px-10 md:px-16 lg:px-20 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 z-0 overflow-y-scroll xl:overflow-hidden ${show ? "!translate-x-0 !opacity-100 !visible !z-[200]" : ""}`}>
                 <FocusLeaf className="absolute top-0 right-0" focusedStyles="exit-focus" onEnterPress={exitModal}>
                     <button className="bg-yellow-300 text-black-1 w-14 h-14 flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 border-[3px] border-yellow-300" onClick={exitModal}>
                         <Back size={30} variant="Bold" />
@@ -294,7 +295,7 @@ export default function MediaModal({ show, media, placeholderImg, authToken, onA
                     <div className="poster w-full max-w-[350px] mx-auto h-[500px] xl:h-full xl:min-w-[500px] xl:w-[500px] relative bg-[#191919] rounded-[30px] bg-opacity-75">
                         {
                             poster ?
-                            <Image width={600} height={600} key={media._id} placeholder="blur" blurDataURL={placeholderImg} src={poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
+                            <Image width={600} height={600} key={media._id} src={poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
                             : <ImageIcon size={170} className="text-yellow-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent group-hover:-fill-yellow-300 transition-all ease-linear duration-500" variant="Broken" />
                         }
                     </div>
@@ -378,10 +379,12 @@ export default function MediaModal({ show, media, placeholderImg, authToken, onA
                     </div>
 
                     {
-                        mediaUrl && <PlayMedia show={showPlayer} mediaUrl={mediaUrl} mediaFormat="mp4" mediaType="video/mp4" onExit={onPlayerExit} />
+                        <PlayMedia show={showPlayer} mediaUrl={mediaUrl} mediaFormat="mp4" mediaType="video/mp4" onExit={onPlayerExit} />
                     }
                 </div>
             </div>
         </FocusContext.Provider>
     )
-}
+})
+
+export default MediaModal
