@@ -28,7 +28,7 @@ export default function Episode({ authToken, episode, onClick, episodeStreams, i
     const onFocusStream = useCallback(
         () => {
             setFocus(episode._id)
-        }, []
+        }, [episode._id]
     )
 
     function modifyStreamOffset(focusDetails: FocusDetails) {

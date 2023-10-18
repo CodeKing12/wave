@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { memo, useRef, useEffect, useState, useCallback } from "react";
 import VideoJS from "./VideoJS";
 import FocusLeaf from "./FocusLeaf";
 import { Back } from "iconsax-react";
@@ -6,16 +6,41 @@ import videojs from "video.js";
 import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 import { fullscreenShortcut, handleEscape, handlePlayerShortcuts } from "@/utils/general";
 import Player from "video.js/dist/types/player";
+// import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster, MediaCaptions, type Props, type MediaCaptionsProps, type MediaPlayerProps, type MediaOutletProps } from '@vidstack/react';
+import { I18nInfoLabel } from "./MediaTypes";
+import {
+    isHLSProvider,
+    MediaPlayer,
+    MediaProvider,
+    Poster,
+    Track,
+    type MediaCanPlayDetail,
+    type MediaCanPlayEvent, MediaPlayerInstance,
+    type MediaProviderInstance,
+    type MediaProviderAdapter,
+    type MediaProviderChangeEvent,
+    useStore,
+    Time,
+  } from '@vidstack/react';
+  import {
+    DefaultAudioLayout,
+    defaultLayoutIcons,
+    DefaultVideoLayout,
+  } from '@vidstack/react/player/layouts/default';
+
+import '@vidstack/react/player/styles/default/theme.css';
+import '@vidstack/react/player/styles/default/layouts/video.css';
 
 export interface PlayMediaProps {
     show: boolean,
     mediaUrl?: string,
     mediaFormat: string,
     mediaType: string,
+    mediaDetails: I18nInfoLabel,
     onExit: () => void;
 }
 
-export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onExit }: PlayMediaProps) {
+const PlayMedia = memo(function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, mediaDetails, onExit }: PlayMediaProps) {
     const {
         ref,
         focusSelf,
@@ -28,34 +53,113 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
         focusable: Boolean(mediaUrl?.length),
         // focusBoundaryDirections: ["left", "right"]
     });
+    const providerRef = useRef<MediaProviderInstance>(null)
+    console.log("PlayMedia is re-rendering")
     const playerRef = useRef<Player | null>(null);
+    const player = useRef<MediaPlayerInstance>(null);
+    // const { canPlay, currentSrc, duration, crossorigin, error } = useStore(MediaPlayerInstance, player);
+    // const [src, setSrc] = useState("")
+    // const [key, setKey] = useState(1)
+    // const [isSet, setIsSet] = useState(false)
+
+    // useEffect(() => {
+    //     if (mediaUrl) {
+    //         // const source = document.createElement("video")
+    //         const mediaPlayer = document.querySelector<HTMLVideoElement>("#media-player video")
+    //         const mediaClone = mediaPlayer?.cloneNode(true)
+    //         if (mediaPlayer && mediaClone) {
+    //             console.log("Replacing Media")
+    //             mediaPlayer?.replaceWith(mediaClone)
+    //         }
+    //         // source.preload = "metadata"
+    //         // source.ariaHidden = "true"
+    //         // source.src = mediaUrl + ".mp4"
+    //         // providerRef.current?.$el?.appendChild(source)
+    //         // console.log("Appending Video to Provider")
+    //         // player.current?.startLoading();
+    //     }
+    // }, [mediaUrl])
+
+    // useEffect(() => {
+    //     console.log("SET SRC", mediaUrl)
+    //     const mediaPlayer = document.querySelector<HTMLVideoElement>("#media-player video")
+    //     console.log(currentSrc, canPlay, duration, error)
+    //     // setIsSet(false)
+
+    //     if (mediaPlayer && canPlay && duration === 0 && !isSet) {
+    //         console.log("Re-adding Source")
+    //         setKey((prevKey) => prevKey + 1)
+    //         setIsSet(true)
+    //         // player.current?.destroy()
+    //         // mediaPlayer.src = `${mediaUrl}.${mediaFormat}` || ""
+    //         // console.log(mediaPlayer.src)
+    //         // player.current?.startLoading()
+    //     } else {
+    //         console.log("Didnt find Media Player")
+    //         console.log(mediaPlayer, canPlay, duration, isSet)
+    //     }
+    // }, [show, mediaUrl, mediaFormat, canPlay, duration, error, crossorigin, currentSrc, isSet])
 
     useEffect(() => {
         if (!show && !mediaUrl) {
-            playerRef.current?.dispose()
+            // playerRef.current?.dispose()
+            document.removeEventListener("keydown", (event) => playerShortcuts(event))
         }
-        if (mediaUrl?.length) {
+        // if (mediaUrl?.length) {
             // console.log("Focused Myself")
-            focusSelf();
-        }
+            // focusSelf();
+        // }
 
-        let keyTimestamps = {
-            arrowUpTimestamp: 0
-        }
+        // let keyTimestamps = {
+        //     arrowUpTimestamp: 0
+        // }
 
         function playerShortcuts(event: KeyboardEvent) {
+            // console.log("Doing Shortcuts")
             if (show) {
                 if (event.code === "Escape" || event.keyCode === 27) {
                     onExit();
                 }    
     
-                if (playerRef.current) {
-                    handlePlayerShortcuts(event, playerRef.current, keyTimestamps)
-                }
+                // if (playerRef.current) {
+                //     // if (event.key === 'ArrowUp') {
+                //     //     // keyTimestamps.arrowUpTimestamp = fullscreenShortcut(keyTimestamps.arrowUpTimestamp, playerRef.current);
+                //     //     const currentTimestamp = Date.now();
+                //     //     const timeSinceLastEnter = currentTimestamp - keyTimestamps.arrowUpTimestamp;
+
+                //     //     if (timeSinceLastEnter < 1000) {
+                //     //     // The user pressed Enter twice within 1 second (adjust the time threshold as needed).
+                //     //         if (document.fullscreenEnabled) {
+                //     //             // Request full-screen mode
+                //     //             try {
+                //     //                 if (playerRef.current.isFullscreen()) {
+                //     //                     playerRef.current.exitFullscreen();
+                //     //                 } else {
+                //     //                     playerRef.current.requestFullscreen();
+                //     //                 }
+                //     //             } catch(error) {
+                //     //                 console.log("Here is the error", error)
+                //     //             }
+                //     //         }
+
+                //     //     // Reset the timestamp to avoid multiple triggers for the same double Enter key press.
+                //     //     keyTimestamps.arrowUpTimestamp = 0;
+
+                //     //     } else {
+                //             // Set the timestamp of the first Enter key press.
+                //     //         keyTimestamps.arrowUpTimestamp = currentTimestamp;
+                //     //     }
+                //     // } else {
+                //         console.log("PlayMedia shortcut handler")
+                //         handlePlayerShortcuts(event, playerRef.current, keyTimestamps)
+                //     // }
+                // }
             }
         }
 
-        document.addEventListener("keydown", (event) => playerShortcuts(event))
+        if (show && mediaUrl) {
+            document.addEventListener("keydown", (event) => playerShortcuts(event))
+        }
 
         return () => {
             document.removeEventListener("keydown", (event) => playerShortcuts(event))
@@ -86,6 +190,25 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
         },
     };
 
+    function onProviderChange(
+        provider: MediaProviderAdapter | null,
+        nativeEvent: MediaProviderChangeEvent,
+      ) {
+        console.log("Provider changed", provider, nativeEvent)
+        // We can configure provider's here.
+        if (isHLSProvider(provider)) {
+          provider.config = {};
+        }
+      }
+    
+      // We can listen for the `can-play` event to be notified when the player is ready.
+      const onCanPlay = (detail: MediaCanPlayDetail, nativeEvent: MediaCanPlayEvent) => {
+        // ...
+        console.log(detail, nativeEvent)
+        // console.log(duration)
+      }
+    
+
     const handlePlayerReady = (player: any) => {
         playerRef.current = player;
 
@@ -102,10 +225,10 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black -bg-opacity-90 ${mediaUrl?.length ? "!visible !opacity-100" : ""} ${focused ? "player-is-focused" : "naa-not-focused"}`} ref={ref}>
+            <div className={`fixed w-full h-full top-0 bottom-0 left-0 duration-500 ease-linear opacity-0 invisible bg-black -bg-opacity-90 ${show ? "!visible !opacity-100" : ""} ${focused ? "player-is-focused" : "naa-not-focused"}`} ref={ref}>
                 {/* <MediaPlayer
                     className="h-full"
-                    title={displayDetails?.title || movieDetails.info_labels?.originaltitle}
+                    title={mediaDetails?.title}
                     // src={mediaUrl.length ? "http://localhost:5000/video/"+mediaUrl : ""}
                     src={`${mediaUrl}.mp4`}
                     // src={[{
@@ -114,7 +237,7 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
                     //     }
                     // ]}
                     cap
-                    poster={displayDetails.art.poster || ""}
+                    poster={mediaDetails?.art.poster || ""}
                     // thumbnails="https://media-files.vidstack.io/sprite-fight/thumbnails.vtt"
                     // aspectRatio={selectedStream?.video[0].aspect || 16 / 9}
                     crossorigin={true}
@@ -122,14 +245,25 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
                 >
                     <MediaOutlet>
                         <MediaPoster
-                            alt={displayDetails?.plot}
+                            alt={mediaDetails?.plot}
                         />
                     </MediaOutlet>
                     <MediaCaptions asChild={true} />
                     <MediaCommunitySkin />
                 </MediaPlayer> */}
 
-                <VideoJS options={playerOptions} onReady={handlePlayerReady} quitPlayer={onExit} />
+                {
+                    // mediaUrl && mediaUrl?.length && 
+                    <MediaPlayer
+                    onCanPlay={onCanPlay} id={`media-player`} src={mediaUrl ? `${mediaUrl}.${mediaFormat}` : ""} className="h-full" title={mediaDetails?.title} poster={mediaDetails?.art.poster || ""} keyShortcuts={{togglePaused: "Space Enter", seekBackward: "ArrowLeft", seekForward: "ArrowRight", toggleFullscreen: "ArrowUp", toggleCaptions: "ArrowDown"}} keyTarget={show ? "document" : "player"} autoplay={true} ref={player}>
+                        <MediaProvider ref={providerRef} />
+                        <DefaultVideoLayout icons={defaultLayoutIcons} />
+                        {/* <Time type="duration" /> */}
+                    </MediaPlayer>
+                    // : ""
+                }
+
+                {/* <VideoJS options={playerOptions} onReady={handlePlayerReady} quitPlayer={onExit} /> */}
 
                 {/* <video
                     id="my-video"
@@ -157,4 +291,6 @@ export default function PlayMedia({ show, mediaUrl, mediaFormat, mediaType, onEx
             </div>
         </FocusContext.Provider>
     )
-}
+})
+
+export default PlayMedia

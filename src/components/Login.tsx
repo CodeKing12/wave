@@ -111,13 +111,14 @@ const Login = memo(function Login({ show, onLogin, onClose }: LoginProps) {
                     title: "Login Unsuccessful",
                     message: "Check your network"
                 })
+                setIsAuthenticating(false);
             }
         )
     }
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className={`login-modal fixed w-full h-full top-0 bottom-0 flex justify-center items-center backdrop-blur-lg opacity-0 invisible z-0 duration-300 ease-linear ${show ? "!opacity-100 !visible !z-50" : ""}`} ref={ref}>
+            <div className={`login-modal fixed w-full h-full top-0 bottom-0 flex justify-center items-center backdrop-blur-lg opacity-0 invisible z-0 duration-300 ease-linear ${show ? "!opacity-100 !visible !z-[110]" : ""}`} ref={ref}>
                 <div className={`bg-[#191919] text-white px-8 pt-7 pb-10 w-[450px] rounded-2xl opacity-0 invisible translate-y-10 duration-[400ms] ease-in-out ${show ? "!opacity-100 !visible !translate-y-0" : ""}`}>
                     <div className="flex justify-end mb-10">
                         <FocusLeaf focusedStyles="on-svg-focus" onEnterPress={onClose}>

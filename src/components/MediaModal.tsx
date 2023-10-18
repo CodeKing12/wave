@@ -8,7 +8,6 @@ import { HashLoader } from "react-spinners";
 import { getMediaStreams, getStreamUrl, handleEscape, resolveArtItem, setWidths } from "@/utils/general";
 import 'vidstack/styles/defaults.css';
 import 'vidstack/styles/community-skin/video.css';
-import { MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster, MediaCaptions, type MediaCaptionsProps, type MediaPlayerProps, type MediaOutletProps } from '@vidstack/react';
 import { FocusContext, FocusDetails, getCurrentFocusKey, setFocus, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 import FocusLeaf from "./FocusLeaf";
 import MediaDetails from "./MediaDetails";
@@ -19,6 +18,7 @@ import axiosInstance from "@/utils/axiosInstance";
 import EpisodeList from "./EpisodeList";
 import Image from "next/image";
 import PlayMedia from "./PlayMedia";
+import { useRouter } from "next/router";
 
 interface MediaModalProps {
     show: boolean;
@@ -44,7 +44,7 @@ export interface SeriesStreamObj {
 
 const MediaModal = memo(function MediaModal({ show, media, placeholderImg, authToken, onAuth, onExit }: MediaModalProps) {
     console.log("MediaModal is re-rendering")
-
+    // const router = useRouter();
     const displayDetails = getDisplayDetails(media._source.i18n_info_labels)
     const poster = resolveArtItem(media._source.i18n_info_labels, "poster");
     const fanart = resolveArtItem(media._source.i18n_info_labels, "fanart");
@@ -96,14 +96,23 @@ const MediaModal = memo(function MediaModal({ show, media, placeholderImg, authT
         // console.log(displayDetails);
     }, [media, selectedSeason])
 
-    function onPlayerExit() {
+    const onPlayerExit = useCallback(() => {
         setShowPlayer(false);
         setMediaUrl(undefined);
         if (lastFocus) {
             setFocus(lastFocus)
         }
         console.log("Focused MediaModal")
-    }
+    }, [lastFocus])
+
+    // const onPlayerExit = () => {
+    //     setShowPlayer(false);
+    //     setMediaUrl(undefined);
+    //     if (lastFocus) {
+    //         setFocus(lastFocus)
+    //     }
+    //     console.log("Focused MediaModal")
+    // }
 
     function transformMediaUrl(originalUrl: string) {
         const modifiedUrl = originalUrl.replace(/https:\/\/\d+\.dl\.wsfiles\.cz/, proxyUrl);
@@ -190,6 +199,10 @@ const MediaModal = memo(function MediaModal({ show, media, placeholderImg, authT
                 } else {
                     setLastFocus(undefined)
                 }
+                // router.push({
+                //     pathname: '/play.html',
+                //     query: { mediaLink },
+                // });
                 setMediaUrl(mediaLink);
                 setShowPlayer(true);
                 prevShowPlayer.current = true
@@ -242,6 +255,8 @@ const MediaModal = memo(function MediaModal({ show, media, placeholderImg, authT
         setSelectedSeason(undefined);
         setSelectedEpisode(undefined);
         setShowEpisodes(false);
+        setShowPlayer(false);
+        setMediaUrl(undefined);
         // }, 600)
     }
 
@@ -285,14 +300,15 @@ const MediaModal = memo(function MediaModal({ show, media, placeholderImg, authT
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className={`media-modal fixed top-0 bottom-0 left-0 right-0 w-screen h-screen py-16 px-5 xs:px-7 xsm:px-10 md:px-16 lg:px-20 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-x-20 z-0 overflow-y-scroll xl:overflow-hidden ${show ? "!translate-x-0 !opacity-100 !visible !z-[200]" : ""}`}>
+            <div className={`media-modal fixed top-0 bottom-0 left-0 right-0 w-screen h-screen py-16 px-5 xs:px-7 xsm:px-10 md:px-16 lg:px-20 p-10 bg-black-1 ease-in-out duration-500 opacity-0 invisible -translate-y-20 z-0 xl:overflow-hidden ${showPlayer ? "" : "overflow-y-scroll"} ${show ? "!translate-y-0 !opacity-100 !visible !z-[200]" : ""}`}>
                 <FocusLeaf className="absolute top-0 right-0" focusedStyles="exit-focus" onEnterPress={exitModal}>
                     <button className="bg-yellow-300 text-black-1 w-14 h-14 flex items-center justify-center hover:bg-black-1 hover:text-yellow-300 border-[3px] border-yellow-300" onClick={exitModal}>
                         <Back size={30} variant="Bold" />
                     </button>
                 </FocusLeaf>
-                <div className="flex flex-col xl:flex-row justify-center gap-14 xl:gap-20 xl:h-full">
-                    <div className="poster w-full max-w-[350px] mx-auto h-[500px] xl:h-full xl:min-w-[500px] xl:w-[500px] relative bg-[#191919] rounded-[30px] bg-opacity-75">
+                <div className="flex flex-col xl:flex-row justify-center gap-14 xl:gap-20 xl:h-full relative">
+                    <div className="poster w-full max-w-[350px] mx-auto h-[500px] xl:h-full xl:min-w-[450px] xl:w-[450px] relative bg-[#191919] rounded-[30px] bg-opacity-75">
+                    {/* xl:w-[500px] */}
                         {
                             poster ?
                             <Image width={600} height={600} key={media._id} src={poster} className="w-full h-full object-cover rounded-[30px]" alt={movieTitle} /> || <Skeleton width={500} height="100%" /> /* eslint-disable-line @next/next/no-img-element */
@@ -378,8 +394,19 @@ const MediaModal = memo(function MediaModal({ show, media, placeholderImg, authT
                         <HashLoader size={70} speedMultiplier={1.2} color="#fde047" loading={isLoadingUrl} />
                     </div>
 
+                    {/* <div className={`fixed w-full h-full top-0 bottom-0 duration-500 ease-linear opacity-0 invisible bg-black -bg-opacity-90 ${mediaUrl?.length ? "!visible !opacity-100" : ""}`} ref={ref}>
+                    <MediaPlayer id="media-player" key={mediaUrl} src={mediaUrl + ".mp4"} className="h-full" title={displayDetails?.title} poster={displayDetails?.art.poster || ""} keyShortcuts={{togglePaused: "Space Enter", seekBackward: "ArrowLeft", seekForward: "ArrowRight", toggleFullscreen: "ArrowUp", toggleCaptions: "ArrowDown"}} keyTarget={mediaUrl ? "document" : "player"} autoplay={true}>
+                        <MediaProvider key={mediaUrl} />
+                        <DefaultVideoLayout icons={defaultLayoutIcons} />
+                        <Time type="duration" />
+                    </MediaPlayer>
+                    </div> */}
+
+                    {/* <AVPlay mediaUrl={mediaUrl} onPlaybackComplete={handlePlaybackComplete} /> */}
+
                     {
-                        <PlayMedia show={showPlayer} mediaUrl={mediaUrl} mediaFormat="mp4" mediaType="video/mp4" onExit={onPlayerExit} />
+                        <PlayMedia key={media._id} show={showPlayer} mediaUrl={mediaUrl} mediaFormat="mp4" mediaType="video/mp4" mediaDetails={displayDetails} onExit={onPlayerExit} />
+                        // renderMedia()
                     }
                 </div>
             </div>

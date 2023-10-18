@@ -1,48 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>YMovie player</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="theme-color" content="#fec401">
-	<link rel="stylesheet" href="/css/web/theme.css">
-	<link rel="icon" type="image/png" href="/img/favicon.png">
-	<link rel="apple-touch-icon" href="/img/favicon.png">
-	<style>
-	body {
-		padding: 0;
-	}
-	video {
-		position: absolute;
-		left: 0;
-		width: 100%;
-		max-height: 100%;
-		top: 50%;
-		transform: translateY(-50%);
-	}
-	video:focus {
-		outline: none;
-	}
-	</style>
+	<title>Document</title>
+	<script type="text/javascript" src="$WEBAPIS/webapis/webapis.js"></script>
 </head>
 <body>
+	
+
+	<script>
+		// const params = new URLSearchParams(window.location.search);
+        // const mediaLink = params.get('mediaLink');
+        // mediaLink = "https://8.dl.wsfiles.cz/8261/PUVNkv58J6/524288000/eJw1jsFOwzAMht_FB05Vm2Sp60SaODKBVLgMdqiEmtYV1Vg7pVkRQ7w7BomL5f+T_dlf0IIHrUxOLjeb3CnIYASvMkjgNboKLSmSuErM4CLVGaut9MsfOYNP8cIZTCIK012Zwm6M1bE7fJ6ng9h64eVA5eDYBGd6gxpNJ+YeOZAjtnrQ2JKypvodl7uwjj3Pr0uK3J6ERUEfHJa3NnLeXZtiGN+5KZ72z_VxLekem+KWY5zjdl8_1I8v9c28lbUU_39bruAtVRpxQ2i_fwCsqEPn/ee300c6aaf9108e1b9066c58892c7f223807473d/bnG5tbHir7kcXypnX.mp4"
+		mediaLink = "./Videos/Hidden Strike (2023) (NetNaija.com).mkv"
+		console.log("Here is the mediaUrl: ", mediaLink)
+
+		var objElem = document.createElement('object');
+		objElem.type = 'application/avplayer';
+
+		
+		//Adjust the size and position of the media display area 
+		//by changing the CSS style attribute
+		objElem.style.left = 0 + 'px';
+		objElem.style.top = 0 + 'px';
+		objElem.style.width = window.innerWidth + 'px';
+		objElem.style.height = window.innerHeight + 'px';
+		
+
+		//Append the object element to your document
+		document.body.appendChild(objElem);
+		// webapis.avplay.open('https://0.dl.wsfiles.cz/8238/SMiX3zJ3ic/524288000/eJw1js1qw0AMhN9Fh5wW2_u_XgghhFJIqHtoSnMwhI0tk4U2NmvHBZe+e9VCLxrpYzTSFwTwwAuRuTKTKlMCGETwBYMJPDel1do5bRjMNDK4Uy2F4or68Y8M4Kd0RwY3Ctpfj2mLu_nxQR9vw0BZLdGLtaEVDTcN50a50irVCVKptLbGdDxgEUJnf+10FebYYn8ep4Thg1gi9ImX8RoSZs1S5118xzp_eYonuexlbOp8gyn1af1aHarnt2rVr2ltSv+fjQt4J6UrnNH6+weWx0LQ/528ffc2a2a60d948f93aa4624dd8c7561759da33/JhTrAeCvGE5Tnpp.mp4');
+		webapis.avplay.open(mediaLink);
+		
+		webapis.avplay.setDisplayRect(0,0,window.innerWidth,window.innerHeight);
+		
+		var listener = {
+			onbufferingstart: function() {
+				console.log("Buffering start.");
+			},
+
+			onbufferingprogress: function(percent) {
+				console.log("Buffering progress data : " + percent);
+			},
+
+			onbufferingcomplete: function() {
+				console.log("Buffering complete.");
+			},
+			onstreamcompleted: function() {
+				console.log("Stream Completed");
+				webapis.avplay.stop();
+			},
+
+			oncurrentplaytime: function(currentTime) {
+				console.log("Current playtime: " + currentTime);
+			},
+
+			onerror: function(eventType) {
+				console.log("event type error : " + eventType);
+			},
+
+			onevent: function(eventType, eventData) {
+				console.log("event type: " + eventType + ", data: " + eventData);
+			},
+
+			onsubtitlechange: function(duration, text, data3, data4) {
+				console.log("subtitleText: " + text);
+			},
+			ondrmevent: function(drmEvent, drmData) {
+				console.log("DRM callback: " + drmEvent + ", data: " + drmData);
+			}
+		};
+
+		webapis.avplay.setListener(listener);
+
+		var successCallback = function() {
+			console.log('The media has finished preparing');
+			webapis.avplay.play(); 
+		}
+
+		var errorCallback = function() {
+			console.log('The media has failed to prepare');
+		}
+		
+		webapis.avplay.prepareAsync(successCallback,errorCallback);
+	</script>
 </body>
-<script>
-(() => {
-const video = document.createElement("video");
-video.controls = true;
-video.src = decodeURIComponent(document.location.hash.substring(1));
-video.addEventListener("error", onError, true);
-document.body.appendChild(video);
-
-function onError(event){
-	let detail = "";
-	const error = event.target.error;
-	if(error)
-		detail = `\n\n${error.constructor.name}: ${error.code}`;
-	alert(`Browser can't play this video.${detail}`);
-}
-})();
-
-</script>
 </html>

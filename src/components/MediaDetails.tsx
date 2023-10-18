@@ -27,7 +27,8 @@ export default function MediaDetails({ movieTitle, displayDetails, movieDetails,
 
     return (
         <FocusContext.Provider value={focusKey}>
-            <div className="media-details xl:max-w-[620px] mr-8" ref={ref}>
+            <div className="media-details xl:max-w-[780px] mr-8" ref={ref}>
+            {/* xl:max-w-[620px] */}
                 <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
                     <h2 className="font-semibold text-white opacity-90 text-4xl mb-6">{ movieTitle }</h2>
                 </FocusLeaf>
@@ -35,7 +36,8 @@ export default function MediaDetails({ movieTitle, displayDetails, movieDetails,
                 {
                     displayDetails?.plot ? (
                         <FocusLeaf className="content" focusedStyles="on-focus" onFocus={onFocus}>
-                            <p className="xl:max-w-[600px] leading-loose mb-8">
+                            <p className="xl:max-w-[750px] leading-loose mb-8">
+                            {/* xl:max-w-[600px] */}
                                 {
                                     displayDetails?.plot
                                 }

@@ -337,11 +337,14 @@ export interface KeyTimeStamp {
 
 export function handlePlayerShortcuts(event: KeyboardEvent, player: Player, keyTimestamps: KeyTimeStamp) {
     const skipTime = 10
+    // console.log(player, Boolean(player))
 
-    if (player) {
-        if (event.key === 'ArrowUp') {
-            keyTimestamps.arrowUpTimestamp = fullscreenShortcut(keyTimestamps.arrowUpTimestamp, player);
-        }
+    if (player.player_) {
+        console.log("Called shortcut handler")
+        // Move the fullscreen code directly to the eventhandler to prevent permission errors
+        // if (event.key === 'ArrowUp') {
+        //     keyTimestamps.arrowUpTimestamp = fullscreenShortcut(keyTimestamps.arrowUpTimestamp, player);
+        // }
     
         // `enter or space` key = pause
         if (event.keyCode === 32 || event.keyCode === 13) {
@@ -354,12 +357,14 @@ export function handlePlayerShortcuts(event: KeyboardEvent, player: Player, keyT
         // `right` key to forward by skiptime, `left` key to rewind by skip time 
         if (event.keyCode === 37) {
             const currentTime = player.currentTime()
+            // console.log(currentTime, skipTime)
             const newTime = currentTime && currentTime > skipTime ? currentTime - skipTime : 0
             player.currentTime(newTime)
         }
     
         if (event.keyCode === 39) {
             const currentTime = player.currentTime()
+            // console.log(currentTime, skipTime)
             const newTime = currentTime ? currentTime + skipTime : 0
             player.currentTime(newTime)
         }
