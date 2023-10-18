@@ -13,7 +13,7 @@ export interface VideoPlayerProps {
 
 export const VideoJS = ({options, onReady, quitPlayer}: VideoPlayerProps) => {
 //   const ref = React.useRef(null);
-  console.log("VideoJS is re-rendering")
+  // console.log("VideoJS is re-rendering")
   const playerRef = React.useRef<Player | null>(null);
   const { ref, focused, focusSelf } = useFocusable();
 

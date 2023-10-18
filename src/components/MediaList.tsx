@@ -17,7 +17,7 @@ export interface MediaListProps {
 const MediaList = memo(function MediaList({ media, onCardFocus, onMediaModalOpen, isModalOpen, isSidebarOpen }: MediaListProps) {
     // const { ref, focusKey, hasFocusedChild } = useFocusable()
 
-    console.log("MediaList is re-rendering")
+    // console.log("MediaList is re-rendering")
     const onCardSelect = useCallback(
         (mediaInfo: MediaObj) => {
             // isAuthenticated ? displayMediaInfo(mediaInfo) : onMovieSelect(true)

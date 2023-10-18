@@ -28,7 +28,7 @@ interface SidebarProps {
 }
 
 const NavItem = memo(function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
-    console.log("Nav Item is re-rendering")
+    // console.log("Nav Item is re-rendering")
     const { ref, focused } = useFocusable({onEnterPress: () => onItemClick(page)});
 
     return (
@@ -44,7 +44,7 @@ const NavItem = memo(function NavItem({ icon, text, page, current, onItemClick }
 })
 
 const Sidebar = memo(function Sidebar({ current, finishedLoading, isHidden, isLoggedIn, onHide, onChange, onLogout, onLoginClick }: SidebarProps) {
-    console.log("Sidebar is re-rendering")
+    // console.log("Sidebar is re-rendering")
     const {
         ref,
         focusSelf,

@@ -18,7 +18,7 @@ interface LoginProps {
 
 
 const Login = memo(function Login({ show, onLogin, onClose }: LoginProps) {
-    console.log("Login is Re-rendering")
+    // console.log("Login is Re-rendering")
 
     useEffect(() => {
         function handleLoginEscape(event: KeyboardEvent) {

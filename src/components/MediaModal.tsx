@@ -43,7 +43,7 @@ export interface SeriesStreamObj {
 
 
 const MediaModal = memo(function MediaModal({ show, media, placeholderImg, authToken, onAuth, onExit }: MediaModalProps) {
-    console.log("MediaModal is re-rendering")
+    // console.log("MediaModal is re-rendering")
     // const router = useRouter();
     const displayDetails = getDisplayDetails(media._source.i18n_info_labels)
     const poster = resolveArtItem(media._source.i18n_info_labels, "poster");

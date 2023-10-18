@@ -11,7 +11,7 @@ interface NavProps {
 }
  
 const Navbar = memo(function Navbar({ query, updateQuery, onSearch, showFavorites }: NavProps) {
-    console.log("Navbar is re-rendering")
+    // console.log("Navbar is re-rendering")
     const { ref, focusKey, focused, hasFocusedChild } = useFocusable()
   
     return (

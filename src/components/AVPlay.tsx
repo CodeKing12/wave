@@ -8,8 +8,8 @@ export interface AVPlayProps {
 }
 
 const AVPlay = memo(function AVPlay({ mediaUrl, onPlaybackComplete }: AVPlayProps) {
-    console.log("Here is the mediaUrl: ", mediaUrl)
-	console.log("Re-rendering AVPlay")
+    // console.log("Here is the mediaUrl: ", mediaUrl)
+	// console.log("Re-rendering AVPlay")
     const avRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {

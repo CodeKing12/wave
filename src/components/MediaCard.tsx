@@ -60,7 +60,7 @@ export function getRatingAggr(ratings: RatingObj) {
 }
 
 const MediaCard = memo(function MediaCard({ id, media, showMediaInfo, onEnterPress, onFocus }: MediaCardProps) {
-    console.log("MediaCard is re-rendering")
+    // console.log("MediaCard is re-rendering")
     let genres: string;
     const mediaSource = media?._source
     let { rating, voteCount } = getRatingAggr(mediaSource?.ratings);

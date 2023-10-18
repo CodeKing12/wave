@@ -54,7 +54,7 @@ const PlayMedia = memo(function PlayMedia({ show, mediaUrl, mediaFormat, mediaTy
         // focusBoundaryDirections: ["left", "right"]
     });
     const providerRef = useRef<MediaProviderInstance>(null)
-    console.log("PlayMedia is re-rendering")
+    // console.log("PlayMedia is re-rendering")
     const playerRef = useRef<Player | null>(null);
     const player = useRef<MediaPlayerInstance>(null);
     // const { canPlay, currentSrc, duration, crossorigin, error } = useStore(MediaPlayerInstance, player);

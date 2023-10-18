@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// Comment the output: export & unoptimized: true configurations to fix production build 
 const nextConfig = {
   distDir: "build",
   // output: "export",
