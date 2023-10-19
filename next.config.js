@@ -2,12 +2,12 @@
 // Comment the output: export & unoptimized: true configurations to fix production build 
 const nextConfig = {
   distDir: "build",
-  // output: "export",
+  output: "export",
   assetPrefix: "./",
   // basePath: "/_next",
   reactStrictMode: true,
   images: {
-    // unoptimized: true,
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
